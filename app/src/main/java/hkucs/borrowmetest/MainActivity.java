@@ -3,6 +3,8 @@ package hkucs.borrowmetest;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,13 +18,14 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import hkucs.borrowmetest.RentItem;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     ArrayList <RentItem> items = new ArrayList<RentItem>();
     NavigationView navigationView;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,24 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new MyRecyclerViewAdapter(getDataSet());
+        mRecyclerView.setAdapter(mAdapter);
+
+        RentItem item1 = new RentItem(1);
+        item1.setTitle("Phone");
+        item1.setDescription("buy cool phone now");
+        RentItem item2 = new RentItem(2);
+        item2.setTitle("Phone");
+        item2.setDescription("this is super cool and cheap");
+
+        items.add(item1);
+        items.add(item2);
+
     }
 
     @Override
@@ -107,5 +128,16 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private ArrayList<RentItem> getDataSet() {
+        ArrayList results = new ArrayList<RentItem>();
+        for (int index = 0; index < 20; index++) {
+            RentItem obj = new RentItem(index);
+            obj.setTitle("Title for object " + index);
+            obj.setDescription("Description for object " + index);
+            results.add(index, obj);
+        }
+        return results;
     }
 }

@@ -15,40 +15,61 @@ public class RentItem {
     int objectId;
     int ownerId;
 
-    boolean isAvailable;
+    boolean isAvailable = true;
     String description;
     String title;
     double pricePerHour;
-    ArrayList <String> images;
+    int[] images;
     ArrayList <String> tags;
 
     //Constructor
-    void RentItem(int owner){
+    public RentItem(int owner){
         objectId = counter++;
         ownerId = owner;
     }
 
 
 
-    void addDescription(String s){
-        description = s;
+    void setDescription(String description){
+        this.description = description;
     }
 
-    void addTitle(String t){
-        title = t;
+    String getDescription(){
+        return description;
     }
 
-    void addImage(String path){
-        images.add(path);
+    void setTitle(String title){
+        this.title = title;
     }
 
-    void addPricePerHour(double price){
+    String getTitle(){
+        return title;
+    }
+
+    void setImages(int[] images){
+        this.images = images;
+    }
+
+    int[] getImages(){
+        return images;
+    }
+
+    void setPricePerHour(double price){
         pricePerHour = price;
     }
 
-    void rentItem(){
+    double getPricePerHour(){
+        return pricePerHour;
+    }
+
+    void setAvailable(){
         isAvailable = !isAvailable;
     }
+
+    boolean isAvailable(){
+        return isAvailable;
+    }
+
 
     void addTag(String tag){
         tags.add(tag);
