@@ -1,5 +1,6 @@
 package hkucs.borrowmetest;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,6 +74,10 @@ public class MyRecyclerViewAdapter extends RecyclerView
     public void deleteItem(int index) {
         mDataset.remove(index);
         notifyItemRemoved(index);
+    }
+
+    public RentItem getItem(int index){
+        return mDataset.get(index);
     }
 
     @Override

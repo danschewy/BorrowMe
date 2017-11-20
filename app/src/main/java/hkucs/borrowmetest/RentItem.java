@@ -1,12 +1,13 @@
 package hkucs.borrowmetest;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Dan on 11/8/17.
  */
 
-public class RentItem {
+public class RentItem implements Serializable{
 
     //counter to ensure unique id for every object
     private static int counter = 0;

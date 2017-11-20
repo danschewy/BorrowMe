@@ -1,5 +1,6 @@
 package hkucs.borrowmetest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
@@ -58,16 +60,6 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mRecyclerView.setAdapter(mAdapter);
-
-        RentItem item1 = new RentItem(1);
-        item1.setTitle("Phone");
-        item1.setDescription("buy cool phone now");
-        RentItem item2 = new RentItem(2);
-        item2.setTitle("Phone");
-        item2.setDescription("this is super cool and cheap");
-
-        items.add(item1);
-        items.add(item2);
 
     }
 
@@ -128,6 +120,23 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new
+              MyRecyclerViewAdapter.MyClickListener() {
+                  @Override
+                  public void onItemClick(int position, View v) {
+                      Intent intent = new Intent(getApplicationContext(), ItemView.class);
+                      RentItem item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
+                      Bundle bundle = new Bundle();
+                      bundle.putSerializable("item", item);
+                      intent.putExtras(bundle);
+                      startActivity(intent);
+                  }
+              });
     }
 
     private ArrayList<RentItem> getDataSet() {
