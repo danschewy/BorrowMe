@@ -23,14 +23,15 @@ public class MyRecyclerViewAdapter extends RecyclerView
             implements View
             .OnClickListener {
         ImageView image;
-        TextView title;
-        TextView description;
+        TextView title, description, price, owner;
 
         public DataObjectHolder(View itemView) {
             super(itemView);
             image = (ImageView) itemView.findViewById(R.id.card_image);
             title = (TextView) itemView.findViewById(R.id.card_title);
             description = (TextView) itemView.findViewById(R.id.card_desc);
+            price = (TextView) itemView.findViewById(R.id.card_price);
+            owner = (TextView) itemView.findViewById(R.id.card_owner);
 
             Log.i(LOG_TAG, "Adding Listener");
             itemView.setOnClickListener(this);
@@ -64,6 +65,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
     public void onBindViewHolder(DataObjectHolder holder, int position) {
         holder.title.setText(mDataset.get(position).getTitle());
         holder.description.setText(mDataset.get(position).getDescription());
+        holder.price.setText(String.format("%s%.2f", "$", mDataset.get(position).getPricePerHour()));
+        holder.owner.setText(String.format("%s:%d", "Owner",mDataset.get(position).getOwnerId()));
     }
 
     public void addItem(RentItem rentItem, int index) {

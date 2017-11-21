@@ -30,7 +30,6 @@ public class RentItem implements Serializable{
     }
 
 
-
     void setDescription(String description){
         this.description = description;
     }
@@ -69,6 +68,10 @@ public class RentItem implements Serializable{
 
     boolean isAvailable(){
         return isAvailable;
+    }
+
+    int getOwnerId(){
+        return ownerId;
     }
 
 

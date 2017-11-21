@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity
             RentItem obj = new RentItem(index);
             obj.setTitle("Title for object " + index);
             obj.setDescription("Description for object " + index);
+            obj.setPricePerHour(5.36*index);
             results.add(index, obj);
         }
         return results;

@@ -12,8 +12,7 @@ import com.synnapps.carouselview.ImageListener;
 public class ItemView extends AppCompatActivity {
 
     CarouselView carouselView;
-    TextView title;
-    TextView description;
+    TextView title, description, price;
     RentItem item;
 
     int[] sampleImages = {R.drawable.image_1, R.drawable.image_2, R.drawable.image_3, R.drawable.image_4, R.drawable.image_5};
@@ -25,19 +24,21 @@ public class ItemView extends AppCompatActivity {
 
         carouselView = (CarouselView) findViewById(R.id.item_carousel);
         carouselView.setPageCount(sampleImages.length);
-
         carouselView.setImageListener(imageListener);
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         item = (RentItem) extras.getSerializable("item");
 
-
-
         title = (TextView) findViewById(R.id.item_title);
         title.setText(item.getTitle());
+
         description = (TextView) findViewById(R.id.item_desc);
         description.setText(item.getDescription());
+
+        title = (TextView) findViewById(R.id.item_price);
+        title.setText(String.format("%s%.2f", "$", item.getPricePerHour()));
+
 
     }
 
