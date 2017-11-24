@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BorrowMe.iml" filepath="$PROJECT_DIR$/BorrowMe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BorrowMeTest.iml" filepath="$PROJECT_DIR$/BorrowMeTest.iml" />
       <module fileurl="file://C:\Users\pc user\AndroidStudioProjects\BorrowMe\BorrowMeTest.iml" filepath="C:\Users\pc user\AndroidStudioProjects\BorrowMe\BorrowMeTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

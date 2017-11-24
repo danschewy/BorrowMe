@@ -27,7 +27,7 @@
         </activity>
 
         <activity android:name=".ItemView" />
-        <activity android:name=".new_item"></activity>
+        <activity android:name=".NewItem"></activity>
 
         <activity
             android:name=".LoginActivity"
