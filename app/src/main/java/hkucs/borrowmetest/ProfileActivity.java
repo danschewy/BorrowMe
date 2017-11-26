@@ -33,13 +33,12 @@ public class ProfileActivity extends AppCompatActivity {
         rentedItems.setAdapter(adapter);
 
         //eventully replaced with getting user id and lookining up in db
-        setUser(User.getCurrentUser());
 
         // Name
         final EditText editName = (EditText) findViewById(R.id.editName);
         final TextView viewName = (TextView) findViewById(R.id.viewName);
         Button editNameBtn = (Button) findViewById(R.id.editNameBtn);
-        viewName.setText(user.getName());
+        viewName.setText(user.getFirst_name());
         editNameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View view) {
@@ -90,7 +89,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    public void setUser(User user){
-       this.user = user;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

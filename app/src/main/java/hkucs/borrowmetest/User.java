@@ -14,60 +14,65 @@ public class User implements Serializable {
 
 
     int id;
-    String name;
+    String first_name;
+    String last_name;
     String address;
     String email;
     ArrayList <Integer> rentedItems;
     ArrayList <Integer> itemsForRent;
 
     public User (){
-        id = counter++;
     }
-    public User (String name,String address, String email){
-        this.name = name;
+    public User (String first_name, String last_name,String address, String email){
+        this.first_name = first_name;
+        this.last_name = last_name;
         this.address = address;
         this.email = email;
-        id = counter++;
+    }
+    public String getLast_name() {
+        return last_name;
     }
 
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
 
-    void setId (int userId){
-        this.id = userId;
+    public String getFirst_name() {
+        return first_name;
     }
-    void setName(String name){
-        this.name = name;
+
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
     }
-    void setAddress (String address){
+
+    public void setUserId (int id){
+        this.id = id;
+    }
+    public void setAddress (String address){
         this.address = address;
     }
-    public static void setCurrentUser(User user){current = user;}
 
-    void setemail(String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    void addRentedItem (Integer itemid) {
+    public void addRentedItem (Integer itemid) {
         rentedItems.add(itemid);
     }
 
-    void addItemForRent (Integer itemid) {
+    public void addItemForRent (Integer itemid) {
         itemsForRent.add(itemid);
     }
 
-    public static User getCurrentUser() {
-        return current;
-    }
-    String getName(){
-        return name;
-    }
-    String getAddress() {
+    public String getAddress() {
         return address;
     }
-    String getEmail(){
+    public String getEmail(){
         return email;
     }
     int getId () {
         return id;
+    public void setId(int id) {
+        this.id = id;
     }
-
 }

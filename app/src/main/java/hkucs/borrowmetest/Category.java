@@ -1,12 +1,12 @@
 package hkucs.borrowmetest;
 
-/**
- * Created by H on 11/26/2017.
- */
-
 public class Category {
     private int id = 0;
     String title;
+
+    public Category(){
+        id = id++;
+    }
 
     public Category(String title){
         id = id++;
