@@ -1,6 +1,7 @@
 package hkucs.borrowmetest;
 
 import java.io.Serializable;
+import java.sql.Blob;
 
 /**
  * Created by Dan on 11/8/17.
@@ -15,7 +16,7 @@ public class RentItem implements Serializable{
     int id;
     int ownerId;
 
-    boolean isAvailable = true;
+    int isAvailable = 1;
     String description;
     String title;
     double pricePerHour;
@@ -25,7 +26,6 @@ public class RentItem implements Serializable{
     //Constructor
     public RentItem(){
     }
-
 
     void setDescription(String description){
         this.description = description;
@@ -66,11 +66,11 @@ public class RentItem implements Serializable{
         return pricePerHour;
     }
 
-    void setAvailable(){
-        isAvailable = !isAvailable;
+    void setAvailable(int a){
+        isAvailable = a;
     }
 
-    boolean isAvailable(){
+    int isAvailable(){
         return isAvailable;
     }
 

@@ -8,9 +8,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.sql.Blob;
+import java.util.ArrayList;
 
 /*
 https://www.androidhive.info/2013/09/android-sqlite-database-with-multiple-tables/
+http://www.sqlitetutorial.net/sqlite-create-table/
  */
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -72,8 +74,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ITEM_id + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     ITEM_title + " TEXT NOT NULL, " +
                     ITEM_description + " TEXT NOT NULL, " +
-                    ITEM_isAvailable + "INTEGER DEFAULT 1, " +
-                    ITEM_price + "FLOAT, " +
+                    ITEM_isAvailable + " INTEGER, " +
+                    ITEM_price + " FLOAT, " +
                     ITEM_image + " BLOB ); ";
 
     private static final String TABLE_CREATE_CATEGORIES =
@@ -93,7 +95,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_CREATE_USER_ITEMS =
             "CREATE TABLE " + TABLE_USER_ITEMS + " ( " +
                     UI_U_id + " INTEGER, " +
-                    UI_I_id + " INTEGER " +
+                    UI_I_id + " INTEGER, " +
                     "PRIMARY KEY ("+UI_U_id+", "+UI_I_id+"),"+
                     "FOREIGN KEY ("+UI_U_id+") REFERENCES "+TABLE_USERS+"("+USER_id+"),"+
                     "FOREIGN KEY ("+UI_I_id+") REFERENCES "+TABLE_ITEMS+"("+ITEM_id+")); ";
@@ -201,15 +203,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(ITEM_title, item.getTitle());
         values.put(ITEM_description, item.getDescription());
         values.put(ITEM_price, item.getPricePerHour());
-        values.put(ITEM_isAvailable, item.isAvailable() ? 1 : 0);
-        if(item.getImage() != null){
-            values.put(ITEM_image, item.getImage());
-        }
+        values.put(ITEM_isAvailable, item.isAvailable());
+        values.put(ITEM_image, item.getImage());
 
         // insert row
         long item_id = db.insert(TABLE_ITEMS, null, values);
 
         return item_id;
+    }
+
+    public ArrayList<RentItem> getAllItems(){
+        String selectQuery = "SELECT * FROM " + TABLE_ITEMS;
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+        ArrayList<RentItem> items = new ArrayList<>();
+
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                RentItem i = new RentItem();
+                i.setId(c.getInt((c.getColumnIndex(ITEM_id))));
+                i.setTitle(c.getString(c.getColumnIndex(ITEM_title)));
+                i.setDescription(c.getString(c.getColumnIndex(ITEM_description)));
+                i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));
+                i.setImage(c.getBlob(c.getColumnIndex(ITEM_image)));
+
+                items.add(i);
+                Log.e(LOG, i.getTitle());
+            } while (c.moveToNext());
+        }
+        return items;
     }
 
     public RentItem getItemById(int id){

@@ -16,8 +16,7 @@
         app:counterMaxLength="40"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/descInputLayout">
+        app:layout_constraintStart_toStartOf="parent">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/et_title"
@@ -39,8 +38,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleInputLayout"
-        app:layout_constraintBottom_toTopOf="@id/priceInputLayout">
+        app:layout_constraintTop_toBottomOf="@+id/titleInputLayout">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/et_desc"
@@ -97,10 +95,36 @@
     </Spinner>
 
     <android.support.v7.widget.AppCompatButton
+        android:id="@+id/cam_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="20dp"
+        android:backgroundTint="@color/colorAccent"
+        android:textColor="@android:color/white"
+        android:text="Upload Image"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_category">
+
+    </android.support.v7.widget.AppCompatButton>
+
+    <TextView
+        android:id="@+id/image_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:clickable="false"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cam_button"/>
+
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/et_submitbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
+        android:layout_marginBottom="30dp"
         android:paddingHorizontal="30dp"
         android:paddingVertical="20dp"
         android:backgroundTint="@color/colorAccent"
@@ -108,9 +132,20 @@
         android:text="Upload New Item"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_category">
+        app:layout_constraintBottom_toBottomOf="parent">
 
     </android.support.v7.widget.AppCompatButton>
+
+    <ImageView
+        android:id="@+id/uploaded"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="124dp"
+        android:visibility="gone"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_category" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"

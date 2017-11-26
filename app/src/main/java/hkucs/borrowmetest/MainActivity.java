@@ -144,16 +144,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private ArrayList<RentItem> getDataSet() {
-        ArrayList results = new ArrayList<RentItem>();
-        for (int index = 0; index < 20; index++) {
-            RentItem obj = new RentItem();
-            obj.setId(index);
-            obj.setOwnerId(index);
-            obj.setTitle("Title for object " + index);
-            obj.setDescription("Description for object " + index);
-            obj.setPricePerHour(5.36*index);
-            results.add(index, obj);
-        }
+        ArrayList <RentItem> results;
+        results = db.getAllItems();
         return results;
     }
 }

@@ -1,6 +1,8 @@
 package hkucs.borrowmetest;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 
@@ -67,6 +70,9 @@ public class MyRecyclerViewAdapter extends RecyclerView
         holder.description.setText(mDataset.get(position).getDescription());
         holder.price.setText(String.format("%s%.2f", "$", mDataset.get(position).getPricePerHour()));
         holder.owner.setText(String.format("%s:%d", "Owner",mDataset.get(position).getOwnerId()));
+        byte[] byteArray = mDataset.get(position).getImage();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        holder.image.setImageBitmap(bitmap);
     }
 
     public void addItem(RentItem rentItem, int index) {
