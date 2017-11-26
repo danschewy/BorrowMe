@@ -47,8 +47,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -56,6 +54,21 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Category[] categories = {
+                new Category ("Electronics"),
+                new Category ("Clothing"),
+                new Category ("Accessories"),
+                new Category("Sports equipment"),
+                new Category ("Tools"),
+                new Category ("Miscellaneous")
+        };
+        Menu menu = navigationView.getMenu();
+        Menu submenu = menu.addSubMenu("Categories");
+        for (Category category : categories) {
+            submenu.add(category.getTitle());
+
+        }
+        navigationView.invalidate();
         navigationView.setNavigationItemSelectedListener(this);
         View navheadView = navigationView.getHeaderView(0);
         LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
@@ -72,6 +85,19 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mRecyclerView.setAdapter(mAdapter);
+
+        User dave = new User ("dave","Central, Hong Kong","dave@dave.com.ru.pk");
+        User.setCurrentUser(dave);
+
+
+
+
+
+
+
+
+
+
 
     }
 
@@ -114,7 +140,6 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         Toast.makeText(getApplicationContext(), "ID: "+ Integer.toString(id), Toast.LENGTH_SHORT).show();
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -144,6 +169,7 @@ public class MainActivity extends AppCompatActivity
             obj.setTitle("Title for object " + index);
             obj.setDescription("Description for object " + index);
             obj.setPricePerHour(5.36*index);
+
             results.add(index, obj);
         }
         return results;

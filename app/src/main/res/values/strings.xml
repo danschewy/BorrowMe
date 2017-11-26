@@ -21,4 +21,5 @@
     </string>
     <string name="password_prompt">Password</string>
     <string name="title_activity_profile">ProfileActivity</string>
+    <string name="edit">Edit</string>
 </resources>

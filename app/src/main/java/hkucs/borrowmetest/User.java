@@ -10,8 +10,10 @@ import java.util.ArrayList;
 public class User implements Serializable {
 
     private static int counter = 0;
+    private static User current;
 
-    int userId;
+
+    int id;
     String name;
     String address;
     String email;
@@ -19,18 +21,18 @@ public class User implements Serializable {
     ArrayList <Integer> itemsForRent;
 
     public User (){
-        userId = counter++;
+        id = counter++;
     }
     public User (String name,String address, String email){
         this.name = name;
         this.address = address;
         this.email = email;
-        userId = counter++;
+        id = counter++;
     }
 
 
-    void setUserId (int userId){
-        this.userId = userId;
+    void setId (int userId){
+        this.id = userId;
     }
     void setName(String name){
         this.name = name;
@@ -38,7 +40,7 @@ public class User implements Serializable {
     void setAddress (String address){
         this.address = address;
     }
-
+    public static void setCurrentUser(User user){current = user;}
 
     void setemail(String email) {
         this.email = email;
@@ -52,6 +54,9 @@ public class User implements Serializable {
         itemsForRent.add(itemid);
     }
 
+    public static User getCurrentUser() {
+        return current;
+    }
     String getName(){
         return name;
     }
@@ -61,8 +66,8 @@ public class User implements Serializable {
     String getEmail(){
         return email;
     }
-    int getUserId () {
-        return userId;
+    int getId () {
+        return id;
     }
 
 }

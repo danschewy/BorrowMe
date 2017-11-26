@@ -3,7 +3,7 @@
     <string-array name="category_array">
         <item>Electronics</item>
         <item>Clothing</item>
-        <item>Accesories</item>
+        <item>Accessories</item>
         <item>Sports</item>
         <item>Tools</item>
         <item>Other</item>
