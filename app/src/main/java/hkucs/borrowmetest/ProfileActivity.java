@@ -25,6 +25,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void getUser(int id){
-        user = new User ("Hasan Asim","6 Sassoon Road","hasan.asim134@gmail.com");
+        user = new User ("Hasan", "Asim","6 Sassoon Road","hasan.asim134@gmail.com");
     }
 }

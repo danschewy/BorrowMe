@@ -11,58 +11,67 @@ public class User implements Serializable {
 
     private static int counter = 0;
 
-    int userId;
-    String name;
+    int id;
+    String first_name;
+    String last_name;
     String address;
     String email;
     ArrayList <Integer> rentedItems;
     ArrayList <Integer> itemsForRent;
 
     public User (){
-        userId = counter++;
     }
-    public User (String name,String address, String email){
-        this.name = name;
+    public User (String first_name, String last_name,String address, String email){
+        this.first_name = first_name;
+        this.last_name = last_name;
         this.address = address;
         this.email = email;
-        userId = counter++;
+    }
+    public String getLast_name() {
+        return last_name;
     }
 
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
 
-    void setUserId (int userId){
-        this.userId = userId;
+    public String getFirst_name() {
+        return first_name;
     }
-    void setName(String name){
-        this.name = name;
+
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
     }
-    void setAddress (String address){
+
+    public void setUserId (int id){
+        this.id = id;
+    }
+    public void setAddress (String address){
         this.address = address;
     }
 
-
-    void setemail(String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    void addRentedItem (Integer itemid) {
+    public void addRentedItem (Integer itemid) {
         rentedItems.add(itemid);
     }
 
-    void addItemForRent (Integer itemid) {
+    public void addItemForRent (Integer itemid) {
         itemsForRent.add(itemid);
     }
 
-    String getName(){
-        return name;
-    }
-    String getAddress() {
+    public String getAddress() {
         return address;
     }
-    String getEmail(){
+    public String getEmail(){
         return email;
     }
-    int getUserId () {
-        return userId;
+    public int getId() {
+        return id;
     }
-
+    public void setId(int id) {
+        this.id = id;
+    }
 }

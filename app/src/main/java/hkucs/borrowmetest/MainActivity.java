@@ -30,11 +30,18 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private DatabaseHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        db = new DatabaseHelper(getApplicationContext());
+
+        //User john = new User("Jo", "On", "144 poku rd", "j@j.com");
+        //db.createUser(john);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -46,7 +53,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -140,7 +146,9 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<RentItem> getDataSet() {
         ArrayList results = new ArrayList<RentItem>();
         for (int index = 0; index < 20; index++) {
-            RentItem obj = new RentItem(index);
+            RentItem obj = new RentItem();
+            obj.setId(index);
+            obj.setOwnerId(index);
             obj.setTitle("Title for object " + index);
             obj.setDescription("Description for object " + index);
             obj.setPricePerHour(5.36*index);

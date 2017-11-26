@@ -1,7 +1,6 @@
 package hkucs.borrowmetest;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * Created by Dan on 11/8/17.
@@ -13,7 +12,7 @@ public class RentItem implements Serializable{
     private static int counter = 0;
 
     //object's unique id
-    int objectId;
+    int id;
     int ownerId;
 
     boolean isAvailable = true;
@@ -21,12 +20,10 @@ public class RentItem implements Serializable{
     String title;
     double pricePerHour;
     int[] images;
-    ArrayList <String> tags;
+    byte[] image;
 
     //Constructor
-    public RentItem(int owner){
-        objectId = counter++;
-        ownerId = owner;
+    public RentItem(){
     }
 
 
@@ -46,6 +43,13 @@ public class RentItem implements Serializable{
         return title;
     }
 
+    void setImage(byte[] image){
+        this.image = image;
+    }
+
+    byte[] getImage(){
+        return this.image;
+    }
     void setImages(int[] images){
         this.images = images;
     }
@@ -74,8 +78,16 @@ public class RentItem implements Serializable{
         return ownerId;
     }
 
-
-    void addTag(String tag){
-        tags.add(tag);
+    int getId(){
+        return id;
     }
+
+    void setId(int id){
+        this.id = id;
+    }
+
+    void setOwnerId(int id){
+        this.ownerId = id;
+    }
+
 }
