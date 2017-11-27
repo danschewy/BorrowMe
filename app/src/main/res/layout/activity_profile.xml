@@ -1,33 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="hkucs.borrowmetest.ProfileActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppBarOverlay">
+        android:layout_height="match_parent"
+        android:layout_margin="10dp">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/PopupOverlay" />
+                <TextView
+                    android:id="@+id/details"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Details"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toTopOf="parent"/>
+                <EditText
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:focusable="false"
+                    android:hint="Name"
+                    app:layout_constraintTop_toBottomOf="@+id/details"/>
+                <EditText
+                    android:id="@+id/address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:focusable="false"
+                    android:hint="Address"
+                    app:layout_constraintTop_toBottomOf="@+id/name"/>
 
-    </android.support.design.widget.AppBarLayout>
-
-    <include layout="@layout/content_profile" />
+                <EditText
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:focusable="false"
+                    android:hint="Email"
+                    app:layout_constraintTop_toBottomOf="@+id/address"/>
+                <TextView
+                    android:id="@+id/r_i"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Your rented items"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@+id/email"/>
+                <TextView
+                    android:id="@+id/rentedItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@+id/r_i"/>
+                <TextView
+                    android:id="@+id/i_r"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Items for rent"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@+id/rentedItems"/>
+                <TextView
+                    android:id="@+id/itemsForRent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@+id/i_r"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fab1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
+        app:fabSize="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
-</android.support.design.widget.CoordinatorLayout>
+</android.support.constraint.ConstraintLayout>

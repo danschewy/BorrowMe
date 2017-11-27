@@ -36,6 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String USER_last_name = "last_name";
     private static final String USER_address = "address";
     private static final String USER_email = "email";
+    private static final String USER_password = "password";
 
     //Items Table Column Names
     private static final String ITEM_id = "id";
@@ -67,6 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     USER_first_name + " TEXT NOT NULL, " +
                     USER_last_name + " TEXT NOT NULL, " +
                     USER_address + " TEXT, " +
+                    USER_password + " TEXT, " +
                     USER_email + " TEXT NOT NULL UNIQUE ); ";
 
     private static final String TABLE_CREATE_ITEMS =
@@ -137,6 +139,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(USER_last_name, user.getLast_name());
         values.put(USER_email, user.getEmail());
         values.put(USER_address, user.getAddress());
+        values.put(USER_password, user.getPassword());
 
         // insert row
         long user_id = db.insert(TABLE_USERS, null, values);
@@ -160,6 +163,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 u.setFirst_name(c.getString(c.getColumnIndex(USER_first_name)));
                 u.setLast_name(c.getString(c.getColumnIndex(USER_last_name)));
                 u.setEmail(c.getString(c.getColumnIndex(USER_email)));
+                u.setPassword(c.getString(c.getColumnIndex(USER_password)));
                 String address = c.getString(c.getColumnIndex(USER_address));
                 if(!address.isEmpty()){
                     u.setAddress(address);
@@ -171,7 +175,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public User getUserByEmail(String email){
-        String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE email = ?";
+        String selectQuery = "SELECT " + USER_id + " FROM " + TABLE_USERS + " WHERE email = ?";
 
         Log.e(LOG, selectQuery);
 
@@ -182,14 +186,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                u.setId(c.getInt((c.getColumnIndex(USER_id))));
-                u.setFirst_name(c.getString(c.getColumnIndex(USER_first_name)));
-                u.setLast_name(c.getString(c.getColumnIndex(USER_last_name)));
-                u.setEmail(c.getString(c.getColumnIndex(USER_email)));
-                String address = c.getString(c.getColumnIndex(USER_address));
-                if(!address.isEmpty()){
-                    u.setAddress(address);
-                }
+                u = getUserById(c.getInt(c.getColumnIndex(USER_id)));
+            } while (c.moveToNext());
+        }
+        return u;
+    }
+
+    public User getUserByEmailAndPassword(String email, String password){
+        String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE email = ? AND password = ?";
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{email, password});
+        User u = new User();
+
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                u = getUserById(c.getInt((c.getColumnIndex(USER_id))));
 
             } while (c.moveToNext());
         }
@@ -212,6 +227,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return item_id;
     }
 
+    public int updateItem(RentItem item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ITEM_isAvailable, item.isAvailable());
+
+        // updating row
+        return db.update(TABLE_ITEMS, values, ITEM_id + " = ?",
+                new String[] { String.valueOf(item.getId()) });
+    }
+
     public ArrayList<RentItem> getAllItems(){
         String selectQuery = "SELECT * FROM " + TABLE_ITEMS;
 
@@ -224,15 +250,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                RentItem i = new RentItem();
-                i.setId(c.getInt((c.getColumnIndex(ITEM_id))));
-                i.setTitle(c.getString(c.getColumnIndex(ITEM_title)));
-                i.setDescription(c.getString(c.getColumnIndex(ITEM_description)));
-                i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));
-                i.setImage(c.getBlob(c.getColumnIndex(ITEM_image)));
-
-                items.add(i);
-                Log.e(LOG, i.getTitle());
+                items.add(getItemById(c.getInt((c.getColumnIndex(ITEM_id)))));
             } while (c.moveToNext());
         }
         return items;
@@ -255,6 +273,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 i.setDescription(c.getString(c.getColumnIndex(ITEM_description)));
                 i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));
                 i.setImage(c.getBlob(c.getColumnIndex(ITEM_image)));
+                i.setOwnerId(getItemUser(c.getColumnIndex(ITEM_id)).getId());
 
             } while (c.moveToNext());
         }
@@ -271,6 +290,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long category_id = db.insert(TABLE_CATEGORIES, null, values);
 
         return category_id;
+    }
+
+    public long createUserItem(int user_id, int item_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(UI_U_id, user_id);
+        values.put(UI_I_id, item_id);
+
+        // insert row
+        long ui_id = db.insert(TABLE_USER_ITEMS, null, values);
+
+        return ui_id;
+    }
+
+    public User getItemUser(int item_id) {
+        String selectQuery = "SELECT * FROM " + TABLE_USER_ITEMS + " WHERE "+UI_I_id+" = ?";
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{Integer.toString(item_id)});
+        User r = new User();
+
+        if (c.moveToFirst()) {
+            do {
+                r = getUserById(c.getInt(c.getColumnIndex(UI_U_id)));
+            } while (c.moveToNext());
+        }
+        return r;
+    }
+
+    public ArrayList<RentItem> getAllUserItems(int user_id) {
+        String selectQuery = "SELECT * FROM " + TABLE_USER_ITEMS + " WHERE "+UI_U_id+" = ?";
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{Integer.toString(user_id)});
+        ArrayList<RentItem> r = new ArrayList<>();
+
+        if (c.moveToFirst()) {
+            do {
+                r.add(getItemById(c.getInt(c.getColumnIndex(UI_I_id))));
+            } while (c.moveToNext());
+        }
+        return r;
     }
 }
 
