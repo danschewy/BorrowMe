@@ -10,11 +10,29 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="hkucs.borrowmetest.LoginActivity">
 
+    <!--  Header Starts-->
+    <LinearLayout android:id="@+id/header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dip"
+        android:paddingBottom="5dip">
+        <!-- Logo Start-->
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="227dp"
+            android:layout_marginLeft="10dip"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo" />
+        <!-- Logo Ends -->
+    </LinearLayout>
+    <!--  Header Ends -->
+
 
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:isScrollContainer="false">
 
         <LinearLayout
             android:id="@+id/email_login_form"
@@ -31,7 +49,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_email"
-                    android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true" />
 
@@ -45,7 +62,7 @@
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/password_prompt"
+                    android:hint="Password"
                     android:imeActionId="6"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
@@ -55,14 +72,25 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <Button
+            <android.support.v7.widget.AppCompatButton
                 android:id="@+id/email_sign_in_button"
-                style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="75dp"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@android:color/white"
                 android:layout_marginTop="16dp"
-                android:text="@string/action_sign_in_short"
-                android:textStyle="bold" />
+                android:textSize="16dp"
+                android:text="@string/action_sign_in_short"/>
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/register_button"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp"
+                android:textSize="16dp"
+                android:text="Register" />
 
         </LinearLayout>
 

@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
@@ -37,14 +38,20 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if(User.getCurrentUser()!=null) {
+        }
+        else{
+            Intent i = new Intent(this, SignupActivity.class);
+            startActivity(i);
+            finish();
+        }
 
         db = new DatabaseHelper(getApplicationContext());
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,7 +69,6 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         //create categories
         db.deleteAllCategories();
         String[] catArr = getResources().getStringArray(R.array.category_array);
@@ -81,26 +87,41 @@ public class MainActivity extends AppCompatActivity
 
     View navheadView = navigationView.getHeaderView(0);
     LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
-        navhead.setOnClickListener(new View.OnClickListener()
-
-    {
-        @Override
-        public void onClick (View v){
-        Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-        startActivity(intent);
-    }
-    });
     mRecyclerView =(RecyclerView)
 
     findViewById(R.id.recycler_view);
+        if(User.getCurrentUser()!=null){
+            TextView head_name = navhead.findViewById(R.id.head_name);
+            head_name.setText(User.getCurrentUser().getFirst_name() + " " + User.getCurrentUser().getLast_name());
+            TextView head_email = navhead.findViewById(R.id.head_email);
+            head_email.setText(User.getCurrentUser().getEmail());
+        }
+        navhead.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                intent.putExtra("id", User.getCurrentUser().getId());
+                startActivity(intent);
+            }
+        });
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
     mLayoutManager =new
 
     LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-    mAdapter =new MyRecyclerViewAdapter(getDataSet());
-    mRecyclerView.setAdapter(mAdapter);
 
+        mAdapter = new MyRecyclerViewAdapter(getDataSet());
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy){
+                if (dy > 0)
+                    fab.hide();
+                else if (dy < 0)
+                    fab.show();
+            }
+        });
 }
 
     @Override
@@ -156,17 +177,17 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new
-                                                                          MyRecyclerViewAdapter.MyClickListener() {
-                                                                              @Override
-                                                                              public void onItemClick(int position, View v) {
-                                                                                  Intent intent = new Intent(getApplicationContext(), ItemView.class);
-                                                                                  RentItem item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
-                                                                                  Bundle bundle = new Bundle();
-                                                                                  bundle.putSerializable("item", item);
-                                                                                  intent.putExtras(bundle);
-                                                                                  startActivity(intent);
-                                                                              }
-                                                                          });
+              MyRecyclerViewAdapter.MyClickListener() {
+                  @Override
+                  public void onItemClick(int position, View v) {
+                      Intent intent = new Intent(getApplicationContext(), ItemView.class);
+                      int item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
+                      Bundle bundle = new Bundle();
+                      bundle.putInt("item", item);
+                      intent.putExtras(bundle);
+                      startActivity(intent);
+                  }
+              });
     }
 
     private ArrayList<RentItem> getDataSet() {

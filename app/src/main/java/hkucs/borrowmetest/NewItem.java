@@ -83,16 +83,18 @@ public class NewItem extends AppCompatActivity {
                 }
                 if(image==null){
                     Toast.makeText(getApplicationContext(), "Please upload an image", Toast.LENGTH_LONG).show();
+                    return;
                 }
                 RentItem item = new RentItem();
                 item.setTitle(title.getText().toString());
                 item.setDescription(description.getText().toString());
                 item.setPricePerHour(Double.parseDouble(price.getText().toString()));
                 item.setImage(image); //set image to byte array
-                item.setAvailable(1);
+                item.setAvailable(1); //isAvailable True
 
                 long item_id = db.createItem(item);
                 db.createItemCategory((int) item_id, db.getCategoryByName(category.getSelectedItem().toString()).getId());
+                db.createUserItem(User.getCurrentUser().getId(), (int) item_id);
                 finish();
             }
         });

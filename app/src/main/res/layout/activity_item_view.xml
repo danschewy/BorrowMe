@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -11,11 +12,10 @@
         android:layout_height="fill_parent"
         android:layout_gravity="center">
 
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/shape_bg_white_rounded_rect"
-            android:orientation="vertical">
+            android:background="@drawable/shape_bg_white_rounded_rect">
 
             <com.synnapps.carouselview.CarouselView
                 android:id="@+id/item_carousel"
@@ -27,44 +27,52 @@
                 app:radius="6dp"
                 app:slideInterval="3000"
                 app:strokeColor="#FF777777"
-                app:strokeWidth="1dp">
+                app:strokeWidth="1dp"
+                app:layout_constraintStart_toStartOf="parent">
 
             </com.synnapps.carouselview.CarouselView>
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/item_title"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey_700"
+                android:padding="14dp"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@+id/item_carousel"/>
 
-                <TextView
-                    android:id="@+id/item_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/grey_700"
-                    android:textSize="18sp" />
+            <TextView
+                android:id="@+id/item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey_500"
+                android:padding="14dp"
+                android:textSize="14sp"
+                app:layout_constraintTop_toBottomOf="@+id/item_title"/>
 
-                <TextView
-                    android:id="@+id/item_desc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/grey_500"
-                    android:textSize="14sp" />
+            <TextView
+                android:id="@+id/item_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:textColor="@color/grey_800"
+                android:padding="14dp"
+                android:textSize="14sp"
+                app:layout_constraintTop_toBottomOf="@+id/item_desc"/>
 
-                <TextView
-                    android:id="@+id/item_price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:textColor="@color/grey_800"
-                    android:textSize="14sp" />
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/rent_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorAccent"
+                android:text="Rent This Item"
+                android:layout_marginBottom="30dp"
+                android:padding="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
 
-            </LinearLayout>
-
-
-
-        </LinearLayout>
+        </android.support.constraint.ConstraintLayout>
 
     </android.support.v7.widget.CardView>
 

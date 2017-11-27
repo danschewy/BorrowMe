@@ -11,21 +11,42 @@ public class User implements Serializable {
 
     private static int counter = 0;
 
+    public static User getCurrentUser() {
+        return currentUser;
+    }
+
+    public static void setCurrentUser(User currentUser) {
+        User.currentUser = currentUser;
+    }
+
+    private static User currentUser;
+
     int id;
     String first_name;
     String last_name;
     String address;
     String email;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    String password;
     ArrayList <Integer> rentedItems;
     ArrayList <Integer> itemsForRent;
 
     public User (){
     }
-    public User (String first_name, String last_name,String address, String email){
+    public User (String first_name, String last_name,String address, String email, String password){
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
         this.email = email;
+        this.password = password;
     }
     public String getLast_name() {
         return last_name;

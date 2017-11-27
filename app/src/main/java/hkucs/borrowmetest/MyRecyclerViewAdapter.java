@@ -3,6 +3,8 @@ package hkucs.borrowmetest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,8 +27,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
     public static class DataObjectHolder extends RecyclerView.ViewHolder
             implements View
             .OnClickListener {
-        ImageView image;
-        TextView title, description, price, owner;
+        ImageView image, avail_img;
+        TextView title, description, price, available;
 
         public DataObjectHolder(View itemView) {
             super(itemView);
@@ -34,7 +36,9 @@ public class MyRecyclerViewAdapter extends RecyclerView
             title = (TextView) itemView.findViewById(R.id.card_title);
             description = (TextView) itemView.findViewById(R.id.card_desc);
             price = (TextView) itemView.findViewById(R.id.card_price);
-            owner = (TextView) itemView.findViewById(R.id.card_owner);
+            available = (TextView) itemView.findViewById(R.id.card_available);
+            avail_img = (ImageView) itemView.findViewById(R.id.card_avail_img);
+
 
             Log.i(LOG_TAG, "Adding Listener");
             itemView.setOnClickListener(this);
@@ -69,7 +73,12 @@ public class MyRecyclerViewAdapter extends RecyclerView
         holder.title.setText(mDataset.get(position).getTitle());
         holder.description.setText(mDataset.get(position).getDescription());
         holder.price.setText(String.format("%s%.2f", "$", mDataset.get(position).getPricePerHour()));
-        holder.owner.setText(String.format("%s:%d", "Owner",mDataset.get(position).getOwnerId()));
+        boolean isAvailable = true;
+        if(mDataset.get(position).isAvailable()!=1)
+            isAvailable = false;
+        holder.available.setText(isAvailable? "Available":"Not Available");
+        holder.available.setCompoundDrawablesWithIntrinsicBounds(isAvailable? R.drawable.ic_check_black_24dp : R.drawable.ic_cancel_black_24dp,0, 0, 0);
+        //holder.avail_img.setColorFilter(isAvailable? R.color.green_500 : R.color.red_900, PorterDuff.Mode.SRC_ATOP);
         byte[] byteArray = mDataset.get(position).getImage();
 
         if (byteArray != null ){
@@ -88,8 +97,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
         notifyItemRemoved(index);
     }
 
-    public RentItem getItem(int index){
-        return mDataset.get(index);
+    public int getItem(int index){
+        return mDataset.get(index).getId();
     }
 
     @Override
