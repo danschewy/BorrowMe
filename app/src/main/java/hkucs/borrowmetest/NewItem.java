@@ -54,6 +54,7 @@ public class NewItem extends AppCompatActivity {
         final TextInputEditText description = (TextInputEditText) findViewById(R.id.et_desc);
         final TextInputEditText price = (TextInputEditText) findViewById(R.id.et_price);
         final TextView path = (TextView) findViewById(R.id.image_path);
+        final Spinner category = findViewById(R.id.et_category);
         Button photoButton = (Button) this.findViewById(R.id.cam_button);
         photoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,11 +88,11 @@ public class NewItem extends AppCompatActivity {
                 item.setTitle(title.getText().toString());
                 item.setDescription(description.getText().toString());
                 item.setPricePerHour(Double.parseDouble(price.getText().toString()));
-
                 item.setImage(image); //set image to byte array
                 item.setAvailable(1);
 
-                db.createItem(item);
+                long item_id = db.createItem(item);
+                db.createItemCategory((int) item_id, db.getCategoryByName(category.getSelectedItem().toString()).getId());
                 finish();
             }
         });

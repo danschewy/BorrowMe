@@ -20,12 +20,13 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ArrayList <RentItem> items = new ArrayList<RentItem>();
+    ArrayList<RentItem> items = new ArrayList<RentItem>();
     NavigationView navigationView;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -39,8 +40,6 @@ public class MainActivity extends AppCompatActivity
 
         db = new DatabaseHelper(getApplicationContext());
 
-        //User john = new User("Jo", "On", "144 poku rd", "j@j.com");
-        //db.createUser(john);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,23 +62,46 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        View navheadView = navigationView.getHeaderView(0);
-        LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
-        navhead.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                startActivity(intent);
-            }
-        });
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MyRecyclerViewAdapter(getDataSet());
-        mRecyclerView.setAdapter(mAdapter);
 
+        //create categories
+        db.deleteAllCategories();
+        String[] catArr = getResources().getStringArray(R.array.category_array);
+        for (String title : catArr) {
+            db.createCategory(new Category(title));
+        }
+        ArrayList<Category> categories = db.getAllCategories();
+        Menu menu = navigationView.getMenu();
+        menu.add("All");
+        for (Category cat : categories) {
+            menu.add(cat.getTitle());
+        }
+
+        navigationView.invalidate();
+
+
+    View navheadView = navigationView.getHeaderView(0);
+    LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
+        navhead.setOnClickListener(new View.OnClickListener()
+
+    {
+        @Override
+        public void onClick (View v){
+        Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+        startActivity(intent);
     }
+    });
+    mRecyclerView =(RecyclerView)
+
+    findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+    mLayoutManager =new
+
+    LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+    mAdapter =new MyRecyclerViewAdapter(getDataSet());
+    mRecyclerView.setAdapter(mAdapter);
+
+}
 
     @Override
     public void onBackPressed() {
@@ -118,9 +140,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Toast.makeText(getApplicationContext(), "ID: "+ Integer.toString(id), Toast.LENGTH_SHORT).show();
-
-
+        if (item.getTitle().equals("All")){
+            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(getDataSet()),true);
+        }else {
+            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(getFilteredData((String) item.getTitle())),false);
+        }
+        Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+        mAdapter.notifyDataSetChanged();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -130,22 +156,32 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new
-              MyRecyclerViewAdapter.MyClickListener() {
-                  @Override
-                  public void onItemClick(int position, View v) {
-                      Intent intent = new Intent(getApplicationContext(), ItemView.class);
-                      RentItem item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
-                      Bundle bundle = new Bundle();
-                      bundle.putSerializable("item", item);
-                      intent.putExtras(bundle);
-                      startActivity(intent);
-                  }
-              });
+                                                                          MyRecyclerViewAdapter.MyClickListener() {
+                                                                              @Override
+                                                                              public void onItemClick(int position, View v) {
+                                                                                  Intent intent = new Intent(getApplicationContext(), ItemView.class);
+                                                                                  RentItem item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
+                                                                                  Bundle bundle = new Bundle();
+                                                                                  bundle.putSerializable("item", item);
+                                                                                  intent.putExtras(bundle);
+                                                                                  startActivity(intent);
+                                                                              }
+                                                                          });
     }
 
     private ArrayList<RentItem> getDataSet() {
-        ArrayList <RentItem> results;
+        ArrayList<RentItem> results;
         results = db.getAllItems();
         return results;
+    }
+
+    private ArrayList<RentItem> getFilteredData(String categoryName){
+        int categoryId = db.getCategoryByName(categoryName).getId();
+        ArrayList<RentItem> filteredItems = db.getItemsByCategory(categoryId);
+        return filteredItems;
+    }
+
+    private void addMenuItems() {
+
     }
 }

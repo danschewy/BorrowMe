@@ -71,8 +71,11 @@ public class MyRecyclerViewAdapter extends RecyclerView
         holder.price.setText(String.format("%s%.2f", "$", mDataset.get(position).getPricePerHour()));
         holder.owner.setText(String.format("%s:%d", "Owner",mDataset.get(position).getOwnerId()));
         byte[] byteArray = mDataset.get(position).getImage();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        holder.image.setImageBitmap(bitmap);
+
+        if (byteArray != null ){
+            Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            holder.image.setImageBitmap(bitmap);
+        }
     }
 
     public void addItem(RentItem rentItem, int index) {
@@ -96,5 +99,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
 
     public interface MyClickListener {
         public void onItemClick(int position, View v);
+    }
+    public void swapData(ArrayList<RentItem> data){
+        mDataset = data;
     }
 }

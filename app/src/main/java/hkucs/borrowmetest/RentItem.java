@@ -22,6 +22,8 @@ public class RentItem implements Serializable{
     double pricePerHour;
     int[] images;
     byte[] image;
+    int categoryId;
+
 
     //Constructor
     public RentItem(){
@@ -88,6 +90,13 @@ public class RentItem implements Serializable{
 
     void setOwnerId(int id){
         this.ownerId = id;
+    }
+
+    void setCategoryId(int id){
+        this.categoryId = id;
+    }
+    int getCategoryId(){
+        return categoryId;
     }
 
 }

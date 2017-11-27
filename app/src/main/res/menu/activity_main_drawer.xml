@@ -26,27 +26,6 @@
         android:title="Categories">
         <menu>
             <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/menu_all"
-                    android:title="All" />
-                <item
-                    android:id="@+id/menu_electronics"
-                    android:title="Electronics" />
-                <item
-                    android:id="@+id/menu_clothing"
-                    android:title="Clothing" />
-                <item
-                    android:id="@+id/menu_accessories"
-                    android:title="Accessories" />
-                <item
-                    android:id="@+id/menu_sports"
-                    android:title="Sports Equipment" />
-                <item
-                    android:id="@+id/menu_tools"
-                    android:title="Tools" />
-                <item
-                    android:id="@+id/menu_misc"
-                    android:title="Miscellaneous" />
             </group>
         </menu>
     </item>
