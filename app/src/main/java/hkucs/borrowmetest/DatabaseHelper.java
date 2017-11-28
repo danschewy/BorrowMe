@@ -158,7 +158,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                u.setId(c.getInt((c.getColumnIndex(USER_id))));
+                u.setId(c.getInt(c.getColumnIndex(USER_id)));
                 u.setFirst_name(c.getString(c.getColumnIndex(USER_first_name)));
                 u.setLast_name(c.getString(c.getColumnIndex(USER_last_name)));
                 u.setEmail(c.getString(c.getColumnIndex(USER_email)));
@@ -265,7 +265,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                items.add(getItemById(c.getInt((c.getColumnIndex(ITEM_id)))));
+                items.add(getItemById(c.getInt(c.getColumnIndex(IC_I_id))));
             } while (c.moveToNext());
         }
         return items;
@@ -283,7 +283,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                i.setId(c.getInt((c.getColumnIndex(ITEM_id))));
+                i.setId(c.getInt(c.getColumnIndex(ITEM_id)));
                 i.setTitle(c.getString(c.getColumnIndex(ITEM_title)));
                 i.setDescription(c.getString(c.getColumnIndex(ITEM_description)));
                 i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));

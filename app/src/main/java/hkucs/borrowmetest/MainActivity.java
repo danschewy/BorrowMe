@@ -38,13 +38,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(User.getCurrentUser()!=null) {
-        }
-        else{
+        if (User.isIsLoggedIn() == false) {
             Intent i = new Intent(this, SignupActivity.class);
             startActivity(i);
             finish();
         }
+
 
         db = new DatabaseHelper(getApplicationContext());
 
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity
     mRecyclerView =(RecyclerView)
 
     findViewById(R.id.recycler_view);
-        if(User.getCurrentUser()!=null){
+        if(User.isIsLoggedIn()){
             TextView head_name = navhead.findViewById(R.id.head_name);
             head_name.setText(User.getCurrentUser().getFirst_name() + " " + User.getCurrentUser().getLast_name());
             TextView head_email = navhead.findViewById(R.id.head_email);
@@ -198,7 +197,8 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<RentItem> getFilteredData(String categoryName){
         int categoryId = db.getCategoryByName(categoryName).getId();
-        ArrayList<RentItem> filteredItems = db.getItemsByCategory(categoryId);
+        ArrayList<RentItem> filteredItems= new ArrayList<>();
+        filteredItems= db.getItemsByCategory(categoryId);
         return filteredItems;
     }
 

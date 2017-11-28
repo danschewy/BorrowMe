@@ -54,10 +54,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        if (User.getCurrentUser()!=null){
-            finish();
-        }
         db = new DatabaseHelper(getApplicationContext());
         // Set up the login form.
         mEmailView = findViewById(R.id.email);
@@ -88,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent i = new Intent(getApplicationContext(), SignupActivity.class);
                 startActivity(i);
+                finish();
             }
         });
 
@@ -146,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
             }
             else{
                 User.setCurrentUser(u);
+                User.setIsLoggedIn(true);
                 Intent i = new Intent(this, MainActivity.class);
                 startActivity(i);
             }

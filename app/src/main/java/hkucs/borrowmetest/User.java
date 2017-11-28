@@ -11,6 +11,16 @@ public class User implements Serializable {
 
     private static int counter = 0;
 
+    public static boolean isIsLoggedIn() {
+        return isLoggedIn;
+    }
+
+    public static void setIsLoggedIn(boolean isLoggedIn) {
+        User.isLoggedIn = isLoggedIn;
+    }
+
+    private static boolean isLoggedIn = false;
+
     public static User getCurrentUser() {
         return currentUser;
     }
@@ -26,6 +36,7 @@ public class User implements Serializable {
     String last_name;
     String address;
     String email;
+
 
     public String getPassword() {
         return password;
