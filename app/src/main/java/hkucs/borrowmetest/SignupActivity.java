@@ -88,6 +88,7 @@ public class SignupActivity extends AppCompatActivity {
                             User u = new User(name.split(" ")[0], name.split( " ")[1], address, email, password);
                             db.createUser(u);
                             User.setCurrentUser(u);
+                            User.setIsLoggedIn(true);
                             onSignupSuccess();
                         }
                         progressDialog.dismiss();
@@ -99,7 +100,8 @@ public class SignupActivity extends AppCompatActivity {
     public void onSignupSuccess() {
         _signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
-        finish();
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(i);
     }
 
     public void onSignupFailed() {

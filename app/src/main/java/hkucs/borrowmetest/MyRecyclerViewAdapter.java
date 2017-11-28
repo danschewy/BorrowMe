@@ -80,8 +80,11 @@ public class MyRecyclerViewAdapter extends RecyclerView
         holder.available.setCompoundDrawablesWithIntrinsicBounds(isAvailable? R.drawable.ic_check_black_24dp : R.drawable.ic_cancel_black_24dp,0, 0, 0);
         //holder.avail_img.setColorFilter(isAvailable? R.color.green_500 : R.color.red_900, PorterDuff.Mode.SRC_ATOP);
         byte[] byteArray = mDataset.get(position).getImage();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        holder.image.setImageBitmap(bitmap);
+
+        if (byteArray != null ){
+            Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            holder.image.setImageBitmap(bitmap);
+        }
     }
 
     public void addItem(RentItem rentItem, int index) {
@@ -105,5 +108,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
 
     public interface MyClickListener {
         public void onItemClick(int position, View v);
+    }
+    public void swapData(ArrayList<RentItem> data){
+        mDataset = data;
     }
 }

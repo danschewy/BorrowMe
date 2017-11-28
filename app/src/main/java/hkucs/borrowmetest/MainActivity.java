@@ -21,12 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ArrayList <RentItem> items = new ArrayList<RentItem>();
+    ArrayList<RentItem> items = new ArrayList<RentItem>();
     NavigationView navigationView;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -37,13 +38,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(User.getCurrentUser()!=null) {
-        }
-        else{
+        if (User.isIsLoggedIn() == false) {
             Intent i = new Intent(this, SignupActivity.class);
             startActivity(i);
             finish();
         }
+
 
         db = new DatabaseHelper(getApplicationContext());
 
@@ -68,9 +68,28 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        View navheadView = navigationView.getHeaderView(0);
-        LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
-        if(User.getCurrentUser()!=null){
+        //create categories
+        db.deleteAllCategories();
+        String[] catArr = getResources().getStringArray(R.array.category_array);
+        for (String title : catArr) {
+            db.createCategory(new Category(title));
+        }
+        ArrayList<Category> categories = db.getAllCategories();
+        Menu menu = navigationView.getMenu();
+        menu.add("All");
+        for (Category cat : categories) {
+            menu.add(cat.getTitle());
+        }
+
+        navigationView.invalidate();
+
+
+    View navheadView = navigationView.getHeaderView(0);
+    LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
+    mRecyclerView =(RecyclerView)
+
+    findViewById(R.id.recycler_view);
+        if(User.isIsLoggedIn()){
             TextView head_name = navhead.findViewById(R.id.head_name);
             head_name.setText(User.getCurrentUser().getFirst_name() + " " + User.getCurrentUser().getLast_name());
             TextView head_email = navhead.findViewById(R.id.head_email);
@@ -86,8 +105,11 @@ public class MainActivity extends AppCompatActivity
         });
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
+    mLayoutManager =new
+
+    LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
         mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
@@ -99,8 +121,7 @@ public class MainActivity extends AppCompatActivity
                     fab.show();
             }
         });
-
-    }
+}
 
     @Override
     public void onBackPressed() {
@@ -139,9 +160,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Toast.makeText(getApplicationContext(), "ID: "+ Integer.toString(id), Toast.LENGTH_SHORT).show();
-
-
+        if (item.getTitle().equals("All")){
+            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(getDataSet()),true);
+        }else {
+            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(getFilteredData((String) item.getTitle())),false);
+        }
+        Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+        mAdapter.notifyDataSetChanged();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -167,8 +192,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     private ArrayList<RentItem> getDataSet() {
-        ArrayList <RentItem> results;
+        ArrayList<RentItem> results;
         results = db.getAllItems();
         return results;
+    }
+
+    private ArrayList<RentItem> getFilteredData(String categoryName){
+        int categoryId = db.getCategoryByName(categoryName).getId();
+        ArrayList<RentItem> filteredItems= new ArrayList<>();
+        filteredItems= db.getItemsByCategory(categoryId);
+        return filteredItems;
+    }
+
+    private void addMenuItems() {
+
     }
 }

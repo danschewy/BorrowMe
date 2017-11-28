@@ -29,7 +29,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_USER_ITEMS = "user_items";
 
 
-
     //Users Table Column Names
     private static final String USER_id = "id";
     private static final String USER_first_name = "first_name";
@@ -43,7 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String ITEM_title = "title";
     private static final String ITEM_description = "description";
     private static final String ITEM_isAvailable = "isAvailable";
-    private static final String ITEM_price= "price";
+    private static final String ITEM_price = "price";
     private static final String ITEM_image = "image";
 
     //Categories Table Column Names
@@ -89,18 +88,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + TABLE_ITEM_CATEGORIES + " ( " +
                     IC_I_id + " INTEGER, " +
                     IC_C_id + " INTEGER," +
-                    "PRIMARY KEY ("+IC_I_id+", "+IC_C_id+"),"+
-                    "FOREIGN KEY ("+IC_I_id+") REFERENCES "+TABLE_ITEMS+"("+ITEM_id+"),"+
-                    "FOREIGN KEY ("+IC_C_id+") REFERENCES "+TABLE_CATEGORIES+"("+CAT_id+")); ";
+                    "PRIMARY KEY (" + IC_I_id + ", " + IC_C_id + ")," +
+                    "FOREIGN KEY (" + IC_I_id + ") REFERENCES " + TABLE_ITEMS + "(" + ITEM_id + ")," +
+                    "FOREIGN KEY (" + IC_C_id + ") REFERENCES " + TABLE_CATEGORIES + "(" + CAT_id + ")); ";
     ;
 
     private static final String TABLE_CREATE_USER_ITEMS =
             "CREATE TABLE " + TABLE_USER_ITEMS + " ( " +
                     UI_U_id + " INTEGER, " +
                     UI_I_id + " INTEGER, " +
-                    "PRIMARY KEY ("+UI_U_id+", "+UI_I_id+"),"+
-                    "FOREIGN KEY ("+UI_U_id+") REFERENCES "+TABLE_USERS+"("+USER_id+"),"+
-                    "FOREIGN KEY ("+UI_I_id+") REFERENCES "+TABLE_ITEMS+"("+ITEM_id+")); ";
+                    "PRIMARY KEY (" + UI_U_id + ", " + UI_I_id + ")," +
+                    "FOREIGN KEY (" + UI_U_id + ") REFERENCES " + TABLE_USERS + "(" + USER_id + ")," +
+                    "FOREIGN KEY (" + UI_I_id + ") REFERENCES " + TABLE_ITEMS + "(" + ITEM_id + ")); ";
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -147,7 +146,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return user_id;
     }
 
-    public User getUserById(int id){
+    public User getUserById(int id) {
         String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE id = ?";
 
         Log.e(LOG, selectQuery);
@@ -159,13 +158,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                u.setId(c.getInt((c.getColumnIndex(USER_id))));
+                u.setId(c.getInt(c.getColumnIndex(USER_id)));
                 u.setFirst_name(c.getString(c.getColumnIndex(USER_first_name)));
                 u.setLast_name(c.getString(c.getColumnIndex(USER_last_name)));
                 u.setEmail(c.getString(c.getColumnIndex(USER_email)));
                 u.setPassword(c.getString(c.getColumnIndex(USER_password)));
                 String address = c.getString(c.getColumnIndex(USER_address));
-                if(!address.isEmpty()){
+                if (!address.isEmpty()) {
                     u.setAddress(address);
                 }
 
@@ -174,8 +173,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return u;
     }
 
-    public User getUserByEmail(String email){
-        String selectQuery = "SELECT " + USER_id + " FROM " + TABLE_USERS + " WHERE email = ?";
+    public User getUserByEmail(String email) {
+        String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE email = ?";
 
         Log.e(LOG, selectQuery);
 
@@ -204,8 +203,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                u = getUserById(c.getInt((c.getColumnIndex(USER_id))));
-
+                u = getUserById(c.getInt(c.getColumnIndex(USER_id)));
             } while (c.moveToNext());
         }
         return u;
@@ -240,7 +238,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public ArrayList<RentItem> getAllItems(){
         String selectQuery = "SELECT * FROM " + TABLE_ITEMS;
-
         Log.e(LOG, selectQuery);
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -250,13 +247,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                items.add(getItemById(c.getInt((c.getColumnIndex(ITEM_id)))));
+                items.add(getItemById(c.getInt(c.getColumnIndex(ITEM_id))));
             } while (c.moveToNext());
         }
         return items;
     }
 
-    public RentItem getItemById(int id){
+    public ArrayList<RentItem> getItemsByCategory(int category_id){
+        String selectQuery = "SELECT * FROM " + TABLE_ITEM_CATEGORIES + " WHERE " + IC_C_id + " = ?";
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{Integer.toString(category_id)});
+        ArrayList<RentItem> items = new ArrayList<>();
+
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                items.add(getItemById(c.getInt(c.getColumnIndex(IC_I_id))));
+            } while (c.moveToNext());
+        }
+        return items;
+    }
+
+    public RentItem getItemById(int id) {
         String selectQuery = "SELECT * FROM " + TABLE_ITEMS + " WHERE id = ?";
 
         Log.e(LOG, selectQuery);
@@ -268,28 +283,125 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                i.setId(c.getInt((c.getColumnIndex(ITEM_id))));
+                i.setId(c.getInt(c.getColumnIndex(ITEM_id)));
                 i.setTitle(c.getString(c.getColumnIndex(ITEM_title)));
                 i.setDescription(c.getString(c.getColumnIndex(ITEM_description)));
                 i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));
                 i.setImage(c.getBlob(c.getColumnIndex(ITEM_image)));
+                i.setCategoryId(getItemCategory(c.getColumnIndex(ITEM_id)).getId());
                 i.setOwnerId(getItemUser(c.getColumnIndex(ITEM_id)).getId());
-
             } while (c.moveToNext());
         }
         return i;
     }
+
+    public Category getItemCategory(int item_id){
+        String selectQuery = "SELECT * FROM " + TABLE_ITEM_CATEGORIES + " WHERE " + IC_I_id + "= ?";
+
+        Log.e(LOG, selectQuery);
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{Integer.toString(item_id)});
+        Category r = new Category();
+
+        if (c.moveToFirst()) {
+            do {
+                r = getCategoryById(c.getInt(c.getColumnIndex(IC_C_id)));
+            } while (c.moveToNext());
+        }
+        return r;
+    }
+
+    public long createItemCategory(int item_id,int cat_id){
+            SQLiteDatabase db = this.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(IC_I_id, item_id);
+            values.put(IC_C_id, cat_id);
+
+            // insert row
+            long ic_id = db.insert(TABLE_ITEM_CATEGORIES, null, values);
+            return ic_id;
+        }
+
+
 
     public long createCategory(Category cat) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(CAT_name, cat.getTitle());
-
         // insert row
         long category_id = db.insert(TABLE_CATEGORIES, null, values);
 
         return category_id;
+    }
+
+    // get category by id
+    public Category getCategoryById(int id) {
+        String selectQuery = "SELECT * FROM " + TABLE_CATEGORIES + " WHERE " +CAT_id+" = ?";
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{Integer.toString(id)});
+        Category cat = new Category();
+
+        if (c.moveToFirst()) {
+            do {
+                cat.setId(c.getInt(c.getColumnIndex(CAT_id)));
+                cat.setTitle(c.getString(c.getColumnIndex(CAT_name)));
+
+            } while (c.moveToNext());
+        }
+        return cat;
+    }
+
+    // get category by name
+    public Category getCategoryByName(String name) {
+        String selectQuery = "SELECT * FROM " + TABLE_CATEGORIES + " WHERE " + CAT_name + " = ?";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, new String[]{name});
+        Category cat = new Category();
+
+        if (c.moveToFirst()) {
+            do {
+                cat=getCategoryById(c.getInt(c.getColumnIndex(CAT_id)));
+            } while (c.moveToNext());
+        }
+        return cat;
+    }
+
+
+    //get all categories
+    public ArrayList<Category> getAllCategories(){
+        String selectQuery = "SELECT * FROM " + TABLE_CATEGORIES;
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        ArrayList<Category> categories = new ArrayList<>();
+
+        //loop through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                Category cat = new Category();
+                cat.setId(c.getInt(c.getColumnIndex(CAT_id)));
+                cat.setTitle(c.getString(c.getColumnIndex(CAT_name)));
+
+                categories.add(cat);
+                Log.e(LOG, cat.getTitle());
+            } while (c.moveToNext());
+        }
+        return categories;
+    }
+
+    public void deleteAllCategories() {
+        String deleteQuery = "DELETE FROM " + TABLE_CATEGORIES;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.execSQL(deleteQuery);
     }
 
     public long createUserItem(int user_id, int item_id) {
@@ -337,4 +449,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return r;
     }
 }
+
 
