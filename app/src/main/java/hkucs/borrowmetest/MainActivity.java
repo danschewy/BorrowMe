@@ -162,6 +162,8 @@ public class MainActivity extends AppCompatActivity
                       startActivity(intent);
                   }
               });
+        mAdapter = new MyRecyclerViewAdapter(getDataSet());
+        mRecyclerView.swapAdapter(mAdapter, true);
     }
 
     private ArrayList<RentItem> getDataSet() {

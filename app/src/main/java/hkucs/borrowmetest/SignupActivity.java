@@ -90,7 +90,6 @@ public class SignupActivity extends AppCompatActivity {
                             User.setCurrentUser(u);
                             onSignupSuccess();
                         }
-                        onSignupSuccess();
                         progressDialog.dismiss();
                     }
                 }, 3000);
@@ -111,7 +110,6 @@ public class SignupActivity extends AppCompatActivity {
 
     public void onEmailExists() {
         Toast.makeText(getBaseContext(), "Signup failed: Account already exists", Toast.LENGTH_LONG).show();
-
         _signupButton.setEnabled(true);
     }
 
