@@ -6,6 +6,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +17,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.net.URI;
 import java.nio.ByteBuffer;
 
 public class NewItem extends AppCompatActivity {
@@ -92,8 +98,8 @@ public class NewItem extends AppCompatActivity {
                 item.setImage(image); //set image to byte array
                 item.setAvailable(1); //isAvailable True
 
-                long item_id = db.createItem(item);
-                db.createItemCategory((int) item_id, db.getCategoryByName(category.getSelectedItem().toString()).getId());
+                int item_id = (int) db.createItem(item);
+                db.createItemCategory(item_id, db.getCategoryByName(category.getSelectedItem().toString()).getId());
                 db.createUserItem(User.getCurrentUser().getId(), (int) item_id);
                 finish();
             }

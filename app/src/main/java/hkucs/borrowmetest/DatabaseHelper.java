@@ -5,8 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Blob;
 import java.util.ArrayList;
 
@@ -115,6 +118,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEMS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_CATEGORIES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_ITEMS);
 
         onCreate(db);
     }
@@ -147,7 +152,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public User getUserById(int id) {
-        String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE id = ?";
+        String selectQuery = "SELECT * FROM " + TABLE_USERS + " WHERE "+ USER_id +" = ?";
 
         Log.e(LOG, selectQuery);
 
@@ -266,6 +271,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (c.moveToFirst()) {
             do {
                 items.add(getItemById(c.getInt(c.getColumnIndex(IC_I_id))));
+                Log.e(LOG, "item added to cat");
             } while (c.moveToNext());
         }
         return items;
@@ -288,7 +294,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 i.setDescription(c.getString(c.getColumnIndex(ITEM_description)));
                 i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));
                 i.setImage(c.getBlob(c.getColumnIndex(ITEM_image)));
-                i.setCategoryId(getItemCategory(c.getColumnIndex(ITEM_id)).getId());
+                i.setCategoryId(getItemCategory(c.getInt(c.getColumnIndex(ITEM_id))).getId());
                 i.setOwnerId(getItemUser(c.getColumnIndex(ITEM_id)).getId());
             } while (c.moveToNext());
         }
@@ -296,7 +302,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Category getItemCategory(int item_id){
-        String selectQuery = "SELECT * FROM " + TABLE_ITEM_CATEGORIES + " WHERE " + IC_I_id + "= ?";
+        String selectQuery = "SELECT * FROM " + TABLE_ITEM_CATEGORIES + " WHERE " + IC_I_id + " = ?";
 
         Log.e(LOG, selectQuery);
         SQLiteDatabase db = this.getReadableDatabase();
@@ -350,7 +356,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 cat.setId(c.getInt(c.getColumnIndex(CAT_id)));
                 cat.setTitle(c.getString(c.getColumnIndex(CAT_name)));
-
             } while (c.moveToNext());
         }
         return cat;
@@ -386,12 +391,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //loop through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                Category cat = new Category();
-                cat.setId(c.getInt(c.getColumnIndex(CAT_id)));
-                cat.setTitle(c.getString(c.getColumnIndex(CAT_name)));
-
-                categories.add(cat);
-                Log.e(LOG, cat.getTitle());
+                categories.add(getCategoryById(c.getInt(c.getColumnIndex(CAT_id))));
             } while (c.moveToNext());
         }
         return categories;
@@ -447,6 +447,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (c.moveToNext());
         }
         return r;
+    }
+
+    public static byte[] getBytes(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+        return stream.toByteArray();
+    }
+
+    // convert from byte array to bitmap
+    public static Bitmap getImage(byte[] image) {
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 }
 

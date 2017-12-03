@@ -34,6 +34,12 @@ public class SignupActivity extends AppCompatActivity {
 
         db = new DatabaseHelper(getApplicationContext());
 
+        if(User.isIsLoggedIn()){
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
+            finish();
+        }
+
         _signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

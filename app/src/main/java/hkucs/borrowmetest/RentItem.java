@@ -1,7 +1,9 @@
 package hkucs.borrowmetest;
 
 import java.io.Serializable;
+import java.sql.Array;
 import java.sql.Blob;
+import java.util.ArrayList;
 
 /**
  * Created by Dan on 11/8/17.
@@ -9,6 +11,7 @@ import java.sql.Blob;
 
 public class RentItem implements Serializable{
 
+    private static ArrayList<RentItem> items = new ArrayList<>();
     //counter to ensure unique id for every object
     private static int counter = 0;
 
@@ -27,6 +30,15 @@ public class RentItem implements Serializable{
 
     //Constructor
     public RentItem(){
+    }
+
+
+    public static ArrayList<RentItem> getItems() {
+        return items;
+    }
+
+    public static void setItems(ArrayList<RentItem> items) {
+        RentItem.items = items;
     }
 
     void setDescription(String description){

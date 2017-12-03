@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity
 
         db = new DatabaseHelper(getApplicationContext());
 
+        RentItem.setItems(db.getAllItems());
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -68,11 +71,13 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //create categories
-        db.deleteAllCategories();
-        String[] catArr = getResources().getStringArray(R.array.category_array);
-        for (String title : catArr) {
-            db.createCategory(new Category(title));
+
+        //create categories if need be
+        if(db.getAllCategories().size() == 0 ){
+            String[] catArr = getResources().getStringArray(R.array.category_array);
+            for (String title : catArr) {
+                db.createCategory(new Category(title));
+            }
         }
         ArrayList<Category> categories = db.getAllCategories();
         Menu menu = navigationView.getMenu();
@@ -121,7 +126,7 @@ public class MainActivity extends AppCompatActivity
                     fab.show();
             }
         });
-}
+    }
 
     @Override
     public void onBackPressed() {
@@ -148,7 +153,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_signout){
+            User.setCurrentUser(null);
+            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(i);
+            finish();
             return true;
         }
 
@@ -161,12 +170,15 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (item.getTitle().equals("All")){
-            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(getDataSet()),true);
+            mAdapter = new MyRecyclerViewAdapter(getDataSet());
+            mRecyclerView.swapAdapter(mAdapter, true);
         }else {
-            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(getFilteredData((String) item.getTitle())),false);
+            ArrayList<RentItem> r = getFilteredData((String) item.getTitle());
+            mAdapter = new MyRecyclerViewAdapter(r);
+            mRecyclerView.swapAdapter(mAdapter, true);
         }
-        Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
         mAdapter.notifyDataSetChanged();
+        Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -189,22 +201,22 @@ public class MainActivity extends AppCompatActivity
               });
         mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mRecyclerView.swapAdapter(mAdapter, true);
+        mAdapter.notifyDataSetChanged();
     }
 
     private ArrayList<RentItem> getDataSet() {
-        ArrayList<RentItem> results;
-        results = db.getAllItems();
-        return results;
+        RentItem.setItems(db.getAllItems());
+        return RentItem.getItems();
     }
 
     private ArrayList<RentItem> getFilteredData(String categoryName){
         int categoryId = db.getCategoryByName(categoryName).getId();
-        ArrayList<RentItem> filteredItems= new ArrayList<>();
-        filteredItems= db.getItemsByCategory(categoryId);
+        ArrayList<RentItem> filteredItems = new ArrayList<>();
+        for (RentItem i : RentItem.getItems()){
+            if(i.getCategoryId() == categoryId){
+                filteredItems.add(i);
+            }
+        }
         return filteredItems;
-    }
-
-    private void addMenuItems() {
-
     }
 }

@@ -1,6 +1,8 @@
 package hkucs.borrowmetest;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,7 +16,7 @@ import com.synnapps.carouselview.ImageListener;
 public class ItemView extends AppCompatActivity {
 
     CarouselView carouselView;
-    TextView title, description, price;
+    TextView title, description, price, category;
     RentItem item;
     private DatabaseHelper db;
 
@@ -28,7 +30,7 @@ public class ItemView extends AppCompatActivity {
         db = new DatabaseHelper(getApplicationContext());
 
         carouselView = (CarouselView) findViewById(R.id.item_carousel);
-        carouselView.setPageCount(sampleImages.length);
+        carouselView.setPageCount(1);
         carouselView.setImageListener(imageListener);
 
         Intent intent = getIntent();
@@ -41,8 +43,11 @@ public class ItemView extends AppCompatActivity {
         description = (TextView) findViewById(R.id.item_desc);
         description.setText(item.getDescription());
 
-        title = (TextView) findViewById(R.id.item_price);
-        title.setText(String.format("%s%.2f", "$", item.getPricePerHour()));
+        price = (TextView) findViewById(R.id.item_price);
+        price.setText(String.format("%s%.2f", "$", item.getPricePerHour()));
+
+        category = (TextView) findViewById(R.id.item_category);
+        category.setText(String.format("%s%.2f", "Category: ", db.getCategoryById(item.getCategoryId()).getTitle()));
 
         Button rentButton = (Button) findViewById(R.id.rent_button);
         rentButton.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +67,8 @@ public class ItemView extends AppCompatActivity {
     ImageListener imageListener = new ImageListener() {
         @Override
         public void setImageForPosition(int position, ImageView imageView) {
-            imageView.setImageResource(sampleImages[position]);
+            Bitmap bmp = BitmapFactory.decodeByteArray(item.getImage(), 0, item.getImage().length);
+            imageView.setImageBitmap(bmp);
         }
     };
 
