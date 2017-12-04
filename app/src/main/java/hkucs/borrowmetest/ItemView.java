@@ -20,8 +20,6 @@ public class ItemView extends AppCompatActivity {
     RentItem item;
     private DatabaseHelper db;
 
-    int[] sampleImages = {R.drawable.image_1, R.drawable.image_2, R.drawable.image_3, R.drawable.image_4, R.drawable.image_5};
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +45,7 @@ public class ItemView extends AppCompatActivity {
         price.setText(String.format("%s%.2f", "$", item.getPricePerHour()));
 
         category = (TextView) findViewById(R.id.item_category);
-        category.setText(String.format("%s%.2f", "Category: ", db.getCategoryById(item.getCategoryId()).getTitle()));
+        category.setText(String.format("%s: %s", "Category", db.getCategoryById(item.getCategoryId()).getTitle()));
 
         Button rentButton = (Button) findViewById(R.id.rent_button);
         rentButton.setOnClickListener(new View.OnClickListener() {

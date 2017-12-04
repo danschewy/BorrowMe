@@ -3,14 +3,18 @@ package hkucs.borrowmetest;
 import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,10 +30,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.esafirm.imagepicker.features.ImagePicker;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class NewItem extends AppCompatActivity {
 
@@ -37,6 +47,11 @@ public class NewItem extends AppCompatActivity {
     private static final int CAMERA_REQUEST = 1888;
     private ImageView uploadedImage;
     private byte[] image;
+    private String userChoosenTask = "";
+    private String mCurrentPhotoPath;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_CODE_PICKER = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +80,7 @@ public class NewItem extends AppCompatActivity {
         photoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                getImage();
             }
         });
 
@@ -75,19 +89,19 @@ public class NewItem extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(TextUtils.isEmpty(title.getText())){
+                if (TextUtils.isEmpty(title.getText())) {
                     title.setError("Title cannot be empty");
                     return;
                 }
-                if(TextUtils.isEmpty(description.getText())){
+                if (TextUtils.isEmpty(description.getText())) {
                     title.setError("Description cannot be empty");
                     return;
                 }
-                if(TextUtils.isEmpty(price.getText())){
+                if (TextUtils.isEmpty(price.getText())) {
                     title.setError("Price cannot be empty");
                     return;
                 }
-                if(image==null){
+                if (image == null) {
                     Toast.makeText(getApplicationContext(), "Please upload an image", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -111,12 +125,12 @@ public class NewItem extends AppCompatActivity {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
                 int width = displayMetrics.widthPixels;
-                float scale =  width / view.getWidth();
-                if(view.getScaleX() == 1) {
+                float scale = width / view.getWidth();
+                if (view.getScaleX() == 1) {
                     view.setScaleY(scale);
                     view.setScaleX(scale);
                     view.setElevation(1000);
-                }else{
+                } else {
                     view.setScaleY(1);
                     view.setScaleX(1);
                 }
@@ -124,20 +138,26 @@ public class NewItem extends AppCompatActivity {
         });
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            uploadedImage.setImageBitmap(photo);
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            ArrayList<com.esafirm.imagepicker.model.Image> images = (ArrayList<com.esafirm.imagepicker.model.Image>) ImagePicker.getImages(data);
+            Bitmap imageBitmap = BitmapFactory.decodeFile(images.get(0).getPath());
+            uploadedImage.setImageBitmap(imageBitmap);
             uploadedImage.setVisibility(View.VISIBLE);
+            int bytes = imageBitmap.getByteCount();
 
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            photo.compress(Bitmap.CompressFormat.PNG, 100, bos);
-            byte[] bArray = bos.toByteArray();
-            this.image = bArray;
+            ByteBuffer buffer = ByteBuffer.allocate(bytes); //Create a new buffer
+            imageBitmap.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
+
+            this.image = buffer.array();
         }
-        else{
-            int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(),
-                    Manifest.permission.CAMERA);
-        }
+    }
+
+    public void getImage(){
+        ImagePicker.create(this)
+                .single()// Activity or Fragment
+                .imageDirectory("BorrowMe")
+                .start(REQUEST_CODE_PICKER);
     }
 }
