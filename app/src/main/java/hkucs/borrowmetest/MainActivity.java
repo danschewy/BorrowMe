@@ -203,15 +203,18 @@ public class MainActivity extends AppCompatActivity
                     .getReference()
                     .child("items");
             setUpFirebaseAdapter(query);
-            mRecyclerView.swapAdapter(mFAdapter, true);
+            mRecyclerView.setAdapter(mFAdapter);
         }else {
             Query query = FirebaseDatabase.getInstance()
                     .getReference()
-                    .child("items").orderByChild("category").equalTo(item.getTitle().toString());
+                    .child("items")
+                    .orderByChild("category")
+                    .equalTo(item.getTitle().toString());
             setUpFirebaseAdapter(query);
-            mRecyclerView.swapAdapter(mFAdapter, true);
+            mRecyclerView.setAdapter(mFAdapter);
         }
         mFAdapter.notifyDataSetChanged();
+        mFAdapter.startListening();
         Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
