@@ -139,11 +139,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(USER_first_name, user.getFirst_name());
-        values.put(USER_last_name, user.getLast_name());
-        values.put(USER_email, user.getEmail());
-        values.put(USER_address, user.getAddress());
-        values.put(USER_password, user.getPassword());
+//        values.put(USER_first_name, user.getFirst_name());
+//        values.put(USER_last_name, user.getLast_name());
+//        values.put(USER_email, user.getEmail());
+//        values.put(USER_address, user.getAddress());
+//        values.put(USER_password, user.getPassword());
 
         // insert row
         long user_id = db.insert(TABLE_USERS, null, values);
@@ -163,11 +163,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (c.moveToFirst()) {
             do {
-                u.setId(c.getInt(c.getColumnIndex(USER_id)));
-                u.setFirst_name(c.getString(c.getColumnIndex(USER_first_name)));
-                u.setLast_name(c.getString(c.getColumnIndex(USER_last_name)));
-                u.setEmail(c.getString(c.getColumnIndex(USER_email)));
-                u.setPassword(c.getString(c.getColumnIndex(USER_password)));
+//                u.setId(c.getInt(c.getColumnIndex(USER_id)));
+//                u.setFirst_name(c.getString(c.getColumnIndex(USER_first_name)));
+//                u.setLast_name(c.getString(c.getColumnIndex(USER_last_name)));
+//                u.setEmail(c.getString(c.getColumnIndex(USER_email)));
+//                u.setPassword(c.getString(c.getColumnIndex(USER_password)));
                 String address = c.getString(c.getColumnIndex(USER_address));
                 if (!address.isEmpty()) {
                     u.setAddress(address);
@@ -295,7 +295,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 i.setPricePerHour(c.getFloat(c.getColumnIndex(ITEM_price)));
                 i.setImage(c.getBlob(c.getColumnIndex(ITEM_image)));
                 i.setCategoryId(getItemCategory(c.getInt(c.getColumnIndex(ITEM_id))).getId());
-                i.setOwnerId(getItemUser(c.getColumnIndex(ITEM_id)).getId());
+                //i.setOwnerId(getItemUser(c.getColumnIndex(ITEM_id)).getId());
             } while (c.moveToNext());
         }
         return i;

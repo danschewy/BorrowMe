@@ -114,7 +114,7 @@ public class NewItem extends AppCompatActivity {
 
                 int item_id = (int) db.createItem(item);
                 db.createItemCategory(item_id, db.getCategoryByName(category.getSelectedItem().toString()).getId());
-                db.createUserItem(User.getCurrentUser().getId(), (int) item_id);
+                //db.createUserItem(User.getCurrentUser().getId(), (int) item_id);
                 finish();
             }
         });

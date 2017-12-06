@@ -54,7 +54,7 @@ public class ItemView extends AppCompatActivity {
                 item.setAvailable(0);
                 db.updateItem(item);
                 Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
-                int u = db.getItemUser(item.getId()).getId();
+                int u = 1;
                 i.putExtra("id", u);
                 startActivity(i);
             }

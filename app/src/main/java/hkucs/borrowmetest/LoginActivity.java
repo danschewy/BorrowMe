@@ -32,6 +32,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,12 +57,18 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mEmailView;
     private EditText mPasswordView;
     private View mLoginFormView;
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
+    private String TAG = "LOGIN ACTIVITY: ";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         db = new DatabaseHelper(getApplicationContext());
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
         // Set up the login form.
         mEmailView = findViewById(R.id.email);
 
@@ -130,23 +144,24 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            User u = db.getUserByEmail(email);
-            if(u.getEmail() == null) {
-                mEmailView.setError("Account does not exist");
-                focusView = mEmailView;
-                focusView.requestFocus();
-            }
-            else if(!u.getPassword().equals(password)){
-                mPasswordView.setError("Password Invalid");
-                focusView = mPasswordView;
-                focusView.requestFocus();
-            }
-            else{
-                User.setCurrentUser(u);
-                User.setIsLoggedIn(true);
-                Intent i = new Intent(this, MainActivity.class);
-                startActivity(i);
-            }
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success");
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        finish();
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                        Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
     }
 

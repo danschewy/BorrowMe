@@ -3,6 +3,7 @@ package hkucs.borrowmetest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -11,12 +12,25 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
     private DatabaseHelper db;
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
 
     @Bind(R.id.input_name) EditText _nameText;
     @Bind(R.id.input_address) EditText _addressText;
@@ -31,14 +45,10 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         ButterKnife.bind(this);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
 
         db = new DatabaseHelper(getApplicationContext());
-
-        if(User.isIsLoggedIn()){
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(i);
-            finish();
-        }
 
         _signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,16 +97,40 @@ public class SignupActivity extends AppCompatActivity {
                 new Runnable() {
                     public void run() {
 
-                        if(db.getUserByEmail(email).getEmail()!=null){
-                            onEmailExists();
-                        }
-                        else{
-                            User u = new User(name.split(" ")[0], name.split( " ")[1], address, email, password);
-                            db.createUser(u);
-                            User.setCurrentUser(u);
-                            User.setIsLoggedIn(true);
-                            onSignupSuccess();
-                        }
+                        mDatabase.child("users").child("email").equalTo(email).addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                if(dataSnapshot.exists()){
+                                    onEmailExists();
+                                }
+                                else{
+                                    mAuth.createUserWithEmailAndPassword(email, password);
+                                    mDatabase.child("users").push().setValue(new User(name, address, email));
+                                    onSignupSuccess();
+                                    finish();
+                                }
+                            }
+
+                            @Override
+                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                         progressDialog.dismiss();
                     }
                 }, 3000);
@@ -108,6 +142,7 @@ public class SignupActivity extends AppCompatActivity {
         setResult(RESULT_OK, null);
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
+        finish();
     }
 
     public void onSignupFailed() {

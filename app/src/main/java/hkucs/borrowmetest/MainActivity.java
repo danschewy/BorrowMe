@@ -25,8 +25,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -41,22 +47,49 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private DatabaseHelper db;
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (User.isIsLoggedIn() == false) {
-            Intent i = new Intent(this, SignupActivity.class);
-            startActivity(i);
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        if(mAuth.getCurrentUser() == null){
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         }
+        else{
+            mDatabase.child("users").orderByChild("email").equalTo(mAuth.getCurrentUser().getEmail())
+                    .addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    user = dataSnapshot.getValue(User.class);
+                }
 
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-        myRef.setValue("Hello, World!");
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
         db = new DatabaseHelper(getApplicationContext());
 
@@ -106,17 +139,17 @@ public class MainActivity extends AppCompatActivity
     mRecyclerView =(RecyclerView)
 
     findViewById(R.id.recycler_view);
-        if(User.isIsLoggedIn()){
+        if(mAuth.getCurrentUser() != null){
             TextView head_name = navhead.findViewById(R.id.head_name);
-            head_name.setText(User.getCurrentUser().getFirst_name() + " " + User.getCurrentUser().getLast_name());
+            head_name.setText(mAuth.getCurrentUser().getDisplayName());
             TextView head_email = navhead.findViewById(R.id.head_email);
-            head_email.setText(User.getCurrentUser().getEmail());
+            head_email.setText(mAuth.getCurrentUser().getEmail());
         }
         navhead.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                intent.putExtra("id", User.getCurrentUser().getId());
+                intent.putExtra("uEmail", mAuth.getCurrentUser().getEmail());
                 startActivity(intent);
             }
         });
@@ -168,7 +201,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_signout){
-            User.setCurrentUser(null);
+            mAuth.signOut();
             Intent i = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(i);
             finish();

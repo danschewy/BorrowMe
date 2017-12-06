@@ -11,19 +11,63 @@ import android.view.View;
 import android.widget.TextView;
 
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import static android.support.design.widget.Snackbar.*;
 
 public class ProfileActivity extends AppCompatActivity {
     User user;
-    private DatabaseHelper db;
+    private DatabaseReference mDataBase;
+    private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        db = new DatabaseHelper(getApplicationContext());
+        mAuth = FirebaseAuth.getInstance();
+        mDataBase = FirebaseDatabase.getInstance().getReference();
+
+        mDataBase.child("users").orderByChild("email").equalTo(getIntent().getExtras().getString("uEmail"))
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        user = dataSnapshot.getValue(User.class);
+                        TextView name, email, address;
+                        name = findViewById(R.id.name);
+                        name.setText(user.getName());
+                        email = findViewById(R.id.email);
+                        email.setText(user.getEmail());
+                        address = findViewById(R.id.address);
+                        address.setText(user.getAddress());
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
 
         Intent i = getIntent();
-        user = db.getUserById(i.getExtras().getInt("id"));
 
         FloatingActionButton fab = findViewById(R.id.fab1);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -37,13 +81,5 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(mailer);
             }
         });
-
-        TextView name, email, address;
-        name = findViewById(R.id.name);
-        name.setText(user.getFirst_name() + " " + user.getLast_name());
-        email = findViewById(R.id.email);
-        email.setText(user.getEmail());
-        address = findViewById(R.id.address);
-        address.setText(user.getAddress());
     }
 }
