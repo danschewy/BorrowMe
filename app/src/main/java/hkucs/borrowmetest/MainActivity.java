@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -25,12 +26,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -41,26 +53,26 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private DatabaseHelper db;
+    private DatabaseReference mDatabaseReference;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (User.isIsLoggedIn() == false) {
-            Intent i = new Intent(this, SignupActivity.class);
-            startActivity(i);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+
+        if (user != null) {
+            // user is signed in
+        }
+        else {
+            // no user signed in
+            Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+            startActivity(intent);
             finish();
         }
-
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-
-        myRef.setValue("Hello, World!");
-
-        db = new DatabaseHelper(getApplicationContext());
-
-        RentItem.setItems(db.getAllItems());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,18 +97,26 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //create categories if need be
-        if(db.getAllCategories().size() == 0 ){
-            String[] catArr = getResources().getStringArray(R.array.category_array);
-            for (String title : catArr) {
-                db.createCategory(new Category(title));
-            }
-        }
-        ArrayList<Category> categories = db.getAllCategories();
-        Menu menu = navigationView.getMenu();
+        final DatabaseReference categoryReference = mDatabaseReference.child("categories");
+        categoryReference.orderByKey();
+
+        final Menu menu = navigationView.getMenu();
         menu.add("All");
-        for (Category cat : categories) {
-            menu.add(cat.getTitle());
-        }
+        categoryReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot c : dataSnapshot.getChildren()){
+                    menu.add((String)c.getValue());
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
         navigationView.invalidate();
 
@@ -106,17 +126,17 @@ public class MainActivity extends AppCompatActivity
     mRecyclerView =(RecyclerView)
 
     findViewById(R.id.recycler_view);
-        if(User.isIsLoggedIn()){
+        if(mAuth.getInstance().getCurrentUser() != null) {
             TextView head_name = navhead.findViewById(R.id.head_name);
-            head_name.setText(User.getCurrentUser().getFirst_name() + " " + User.getCurrentUser().getLast_name());
+            head_name.setText(mAuth.getCurrentUser().getDisplayName());
             TextView head_email = navhead.findViewById(R.id.head_email);
-            head_email.setText(User.getCurrentUser().getEmail());
+            head_email.setText(mAuth.getCurrentUser().getEmail());
         }
         navhead.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                intent.putExtra("id", User.getCurrentUser().getId());
+                intent.putExtra("uEmail", mAuth.getCurrentUser().getEmail());
                 startActivity(intent);
             }
         });
@@ -168,8 +188,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_signout){
-            User.setCurrentUser(null);
-            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+            FirebaseAuth.getInstance().signOut();
+            Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);
             finish();
             return true;
@@ -187,7 +207,7 @@ public class MainActivity extends AppCompatActivity
             mAdapter = new MyRecyclerViewAdapter(getDataSet());
             mRecyclerView.swapAdapter(mAdapter, true);
         }else {
-            ArrayList<RentItem> r = getFilteredData((String) item.getTitle());
+            ArrayList<Item> r = getFilteredData((String) item.getTitle());
             mAdapter = new MyRecyclerViewAdapter(r);
             mRecyclerView.swapAdapter(mAdapter, true);
         }
@@ -206,9 +226,9 @@ public class MainActivity extends AppCompatActivity
                   @Override
                   public void onItemClick(int position, View v) {
                       Intent intent = new Intent(getApplicationContext(), ItemView.class);
-                      int item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
+                      String item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
                       Bundle bundle = new Bundle();
-                      bundle.putInt("item", item);
+                      bundle.putString("item", item);
                       intent.putExtras(bundle);
                       startActivity(intent);
                   }
@@ -218,19 +238,65 @@ public class MainActivity extends AppCompatActivity
         mAdapter.notifyDataSetChanged();
     }
 
-    private ArrayList<RentItem> getDataSet() {
-        RentItem.setItems(db.getAllItems());
-        return RentItem.getItems();
+    private ArrayList<Item> getDataSet() {
+        DatabaseReference items = mDatabaseReference.child("items");
+        final ArrayList<Item> itemList = new ArrayList<>();
+        items.orderByChild("title").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    itemList.add(dataSnapshot.getValue(Item.class));
+                    Log.d("LOL","LOL");
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return itemList;
     }
 
-    private ArrayList<RentItem> getFilteredData(String categoryName){
-        int categoryId = db.getCategoryByName(categoryName).getId();
-        ArrayList<RentItem> filteredItems = new ArrayList<>();
-        for (RentItem i : RentItem.getItems()){
-            if(i.getCategoryId() == categoryId){
-                filteredItems.add(i);
+    private ArrayList<Item> getFilteredData(String categoryName){
+        DatabaseReference items = mDatabaseReference.child("items");
+        final ArrayList<Item> filteredItems = new ArrayList<>();
+        items.orderByChild("category").equalTo(categoryName).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (DataSnapshot item : dataSnapshot.getChildren()){
+                        String title =  (String) item.child("title").getValue();
+                        String description =  (String) item.child("description").getValue();
+                        String category =  (String) item.child("category").getValue();
+                        String ownerId =  (String) item.child("ownerEmail").getValue();
+                        String photoUrl =  (String) item.child("photoUrl").getValue();
+                        double price = (Double) item.child("price").getValue();
+                        filteredItems.add(new Item(description, title, category, price, photoUrl, ownerId));
+                    }
+                }
             }
-        }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         return filteredItems;
     }
 }

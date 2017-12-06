@@ -11,6 +11,7 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -31,6 +32,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esafirm.imagepicker.features.ImagePicker;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -43,7 +52,6 @@ import java.util.Date;
 
 public class NewItem extends AppCompatActivity {
 
-    private DatabaseHelper db;
     private static final int CAMERA_REQUEST = 1888;
     private ImageView uploadedImage;
     private byte[] image;
@@ -51,14 +59,20 @@ public class NewItem extends AppCompatActivity {
     private String mCurrentPhotoPath;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_CODE_PICKER = 1;
-
+    private FirebaseStorage storage;
+    private StorageReference storageRef, itemRef, itemImageRef;
+    private DatabaseReference mDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_item);
 
-        db = new DatabaseHelper(getApplicationContext());
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReferenceFromUrl("gs://borrowmetest-1199c.appspot.com/");
+        itemRef = storageRef.child( System.currentTimeMillis() + "_item.jpg");
+        itemImageRef = storageRef.child("images/" + itemRef.getName());
+
 
         uploadedImage = (ImageView) findViewById(R.id.uploaded);
 
@@ -105,17 +119,34 @@ public class NewItem extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Please upload an image", Toast.LENGTH_LONG).show();
                     return;
                 }
-                RentItem item = new RentItem();
-                item.setTitle(title.getText().toString());
-                item.setDescription(description.getText().toString());
-                item.setPricePerHour(Double.parseDouble(price.getText().toString()));
-                item.setImage(image); //set image to byte array
-                item.setAvailable(1); //isAvailable True
 
-                int item_id = (int) db.createItem(item);
-                db.createItemCategory(item_id, db.getCategoryByName(category.getSelectedItem().toString()).getId());
-                db.createUserItem(User.getCurrentUser().getId(), (int) item_id);
-                finish();
+                UploadTask uploadTask = itemRef.putBytes(image);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), "Image upload failed, please try again", Toast.LENGTH_LONG).show();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        Item item = new Item(
+                                title.getText().toString(),
+                                description.getText().toString(),
+                                category.getSelectedItem().toString(),
+                                Double.parseDouble(price.getText().toString()),
+                                itemImageRef.getPath(),
+                                FirebaseAuth.getInstance().getCurrentUser().getEmail()
+                        );
+                        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                        DatabaseReference mypostRef = mDatabaseReference.child("items").push();
+                        mypostRef.setValue(item);
+                        String itemId = mypostRef.getKey();
+                        finish();
+                    }
+                });
+
+
             }
         });
 
@@ -145,12 +176,9 @@ public class NewItem extends AppCompatActivity {
             Bitmap imageBitmap = BitmapFactory.decodeFile(images.get(0).getPath());
             uploadedImage.setImageBitmap(imageBitmap);
             uploadedImage.setVisibility(View.VISIBLE);
-            int bytes = imageBitmap.getByteCount();
-
-            ByteBuffer buffer = ByteBuffer.allocate(bytes); //Create a new buffer
-            imageBitmap.copyPixelsToBuffer(buffer); //Move the byte data to the buffer
-
-            this.image = buffer.array();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            this.image = baos.toByteArray();
         }
     }
 
