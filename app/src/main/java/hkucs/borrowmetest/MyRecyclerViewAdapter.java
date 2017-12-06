@@ -89,8 +89,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl("gs://borrowmetest-1199c.appspot.com/");
         StorageReference pathRef = storageRef.child(mDataset.get(position).photoUrl);
-        Glide.with(holder.mView.getContext())
-                .using(new FirebaseImageLoader()).load(pathRef).into(holder.image);
+//        Glide.with(holder.mView.getContext())
+//                .using(new FirebaseImageLoader()).load(pathRef).into(holder.image);
     }
 
     public void addItem(Item rentItem, int index) {
@@ -104,7 +104,7 @@ public class MyRecyclerViewAdapter extends RecyclerView
     }
 
     public String getItem(int index){
-        return mDataset.get(index).itemId;
+        return mDataset.get(index).getTitle();
     }
 
     @Override

@@ -135,7 +135,7 @@ public class NewItem extends AppCompatActivity {
                                 description.getText().toString(),
                                 category.getSelectedItem().toString(),
                                 Double.parseDouble(price.getText().toString()),
-                                itemImageRef.getPath(),
+                                downloadUrl.toString(),
                                 FirebaseAuth.getInstance().getCurrentUser().getEmail()
                         );
                         mDatabaseReference = FirebaseDatabase.getInstance().getReference();

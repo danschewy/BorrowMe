@@ -3,6 +3,7 @@ package hkucs.borrowmetest;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -13,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,10 +24,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,6 +42,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.Serializable;
@@ -50,11 +58,11 @@ public class MainActivity extends AppCompatActivity
     ArrayList<RentItem> items = new ArrayList<RentItem>();
     NavigationView navigationView;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private DatabaseHelper db;
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mAuth;
+    private FirebaseRecyclerAdapter mFAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,19 +73,21 @@ public class MainActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
 
         if (user != null) {
-            // user is signed in
+            //user signed in
         }
         else {
-            // no user signed in
+            // no user signed in, redirect to login activity
             Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(intent);
             finish();
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //Constructs top toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        //Construct FAB to add item
+        final FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -86,20 +96,22 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //Contstruct left drawer
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        //Setup drawer navigation menu (category filters)
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        //builds components requiring user data
+        buildUI();
 
         //create categories if need be
         final DatabaseReference categoryReference = mDatabaseReference.child("categories");
         categoryReference.orderByKey();
-
         final Menu menu = navigationView.getMenu();
         menu.add("All");
         categoryReference.addValueEventListener(new ValueEventListener() {
@@ -110,45 +122,29 @@ public class MainActivity extends AppCompatActivity
                 }
 
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
         });
-
-
         navigationView.invalidate();
 
-
-    View navheadView = navigationView.getHeaderView(0);
-    LinearLayout navhead = (LinearLayout) navheadView.findViewById(R.id.navheader);
-    mRecyclerView =(RecyclerView)
-
-    findViewById(R.id.recycler_view);
-        if(mAuth.getInstance().getCurrentUser() != null) {
-            TextView head_name = navhead.findViewById(R.id.head_name);
-            head_name.setText(mAuth.getCurrentUser().getDisplayName());
-            TextView head_email = navhead.findViewById(R.id.head_email);
-            head_email.setText(mAuth.getCurrentUser().getEmail());
-        }
-        navhead.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                intent.putExtra("uEmail", mAuth.getCurrentUser().getEmail());
-                startActivity(intent);
-            }
-        });
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        //Build RecyclerView
+        mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-    mLayoutManager =new
-
-    LinearLayoutManager(this);
+        mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new MyRecyclerViewAdapter(getDataSet());
-        mRecyclerView.setAdapter(mAdapter);
+        //Setup RecycleView Adapter
+        //Query for all items
+        Query query = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("items");
+        setUpFirebaseAdapter(query);
+        mFAdapter.startListening();
+        mRecyclerView.setAdapter(mFAdapter);
+
+        //Hide FAB on Scroll
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy){
@@ -158,13 +154,12 @@ public class MainActivity extends AppCompatActivity
                     fab.show();
             }
         });
-
-
     }
 
+    //Hide drawer on back
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -186,7 +181,7 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        //Sign out
         if (id == R.id.action_signout){
             FirebaseAuth.getInstance().signOut();
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
@@ -198,105 +193,132 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    //MODIFY filters recyclerview with chosen category
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
         if (item.getTitle().equals("All")){
-            mAdapter = new MyRecyclerViewAdapter(getDataSet());
-            mRecyclerView.swapAdapter(mAdapter, true);
+            Query query = FirebaseDatabase.getInstance()
+                    .getReference()
+                    .child("items");
+            setUpFirebaseAdapter(query);
+            mRecyclerView.swapAdapter(mFAdapter, true);
         }else {
-            ArrayList<Item> r = getFilteredData((String) item.getTitle());
-            mAdapter = new MyRecyclerViewAdapter(r);
-            mRecyclerView.swapAdapter(mAdapter, true);
+            Query query = FirebaseDatabase.getInstance()
+                    .getReference()
+                    .child("items").orderByChild("category").equalTo(item.getTitle().toString());
+            setUpFirebaseAdapter(query);
+            mRecyclerView.swapAdapter(mFAdapter, true);
         }
-        mAdapter.notifyDataSetChanged();
+        mFAdapter.notifyDataSetChanged();
         Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    //MODIFY. When coming back to main activity, refreshes recyclerview
     @Override
     protected void onResume() {
         super.onResume();
-        ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new
-              MyRecyclerViewAdapter.MyClickListener() {
-                  @Override
-                  public void onItemClick(int position, View v) {
-                      Intent intent = new Intent(getApplicationContext(), ItemView.class);
-                      String item = ((MyRecyclerViewAdapter) mAdapter).getItem(position);
-                      Bundle bundle = new Bundle();
-                      bundle.putString("item", item);
-                      intent.putExtras(bundle);
-                      startActivity(intent);
-                  }
-              });
-        mAdapter = new MyRecyclerViewAdapter(getDataSet());
-        mRecyclerView.swapAdapter(mAdapter, true);
-        mAdapter.notifyDataSetChanged();
     }
 
-    private ArrayList<Item> getDataSet() {
-        DatabaseReference items = mDatabaseReference.child("items");
-        final ArrayList<Item> itemList = new ArrayList<>();
-        items.orderByChild("title").addChildEventListener(new ChildEventListener() {
+    public void buildUI(){
+        buildNavHeader();
+    }
+
+    //setup drawer header with profile information
+    public void buildNavHeader() {
+        View navheadView = navigationView.getHeaderView(0);
+        LinearLayout navhead = navheadView.findViewById(R.id.navheader);
+        TextView head_name = navhead.findViewById(R.id.head_name);
+        head_name.setText(mAuth.getCurrentUser().getDisplayName());
+        TextView head_email = navhead.findViewById(R.id.head_email);
+        head_email.setText(mAuth.getCurrentUser().getEmail());
+        navhead.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    itemList.add(dataSnapshot.getValue(Item.class));
-                    Log.d("LOL","LOL");
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                intent.putExtra("uEmail", mAuth.getCurrentUser().getEmail());
+                startActivity(intent);
             }
         });
-
-        return itemList;
     }
 
-    private ArrayList<Item> getFilteredData(String categoryName){
-        DatabaseReference items = mDatabaseReference.child("items");
-        final ArrayList<Item> filteredItems = new ArrayList<>();
-        items.orderByChild("category").equalTo(categoryName).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void setUpFirebaseAdapter(Query query){
+        FirebaseRecyclerOptions<Item> options =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(query, Item.class)
+                        .build();
+
+        mFAdapter = new FirebaseRecyclerAdapter<Item, ItemHolder>(options) {
+
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    for (DataSnapshot item : dataSnapshot.getChildren()){
-                        String title =  (String) item.child("title").getValue();
-                        String description =  (String) item.child("description").getValue();
-                        String category =  (String) item.child("category").getValue();
-                        String ownerId =  (String) item.child("ownerEmail").getValue();
-                        String photoUrl =  (String) item.child("photoUrl").getValue();
-                        double price = (Double) item.child("price").getValue();
-                        filteredItems.add(new Item(description, title, category, price, photoUrl, ownerId));
+            public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.card_view, parent, false);
+
+                return new ItemHolder(view);
+            }
+
+            @Override
+            protected void onBindViewHolder(ItemHolder holder, final int position, Item model) {
+                holder.title.setText(model.getTitle());
+                holder.description.setText(model.getDescription());
+                holder.available.setText(model.isAvailable()? "Available":"Not Available");
+                holder.available.setCompoundDrawablesWithIntrinsicBounds(model.isAvailable()? R.drawable.ic_check_black_24dp : R.drawable.ic_cancel_black_24dp,0, 0, 0);
+                holder.avail_img.setColorFilter(model.isAvailable()? R.color.green_500 : R.color.red_900, PorterDuff.Mode.SRC_ATOP);
+                holder.price.setText(Double.toString(model.getPrice()));
+                Glide.with(holder.image.getContext()).load(model.getPhotoUrl()).into(holder.image);
+
+                holder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent i = new Intent(MainActivity.this, ItemView.class);
+                        i.putExtra("item_key", mFAdapter.getRef(position).getKey());
+                        startActivity(i);
                     }
-                }
+                });
             }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+        };
 
-            }
-        });
+    }
 
-        return filteredItems;
+    public static class ItemHolder extends RecyclerView.ViewHolder
+            implements View
+            .OnClickListener {
+        MyClickListener myClickListener;
+        View mView;
+        ImageView image, avail_img;
+        TextView title, description, price, available;
+
+        public ItemHolder(View itemView) {
+            super(itemView);
+            image = itemView.findViewById(R.id.card_image);
+            title = itemView.findViewById(R.id.card_title);
+            description = itemView.findViewById(R.id.card_desc);
+            price = itemView.findViewById(R.id.card_price);
+            available = itemView.findViewById(R.id.card_available);
+            avail_img = itemView.findViewById(R.id.card_avail_img);
+
+            Log.i("MAIN ITEMHOLDER", "Adding Listener");
+            mView = itemView;
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            myClickListener.onItemClick(getAdapterPosition(), v);
+        }
+
+        public interface MyClickListener {
+            public void onItemClick(int position, View v);
+        }
+
+        public void setOnItemClickListener(MyClickListener myClickListener) {
+            this.myClickListener = myClickListener;
+        }
     }
 }
